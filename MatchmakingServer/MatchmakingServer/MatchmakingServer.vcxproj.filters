@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="LIB">
+      <UniqueIdentifier>{0c8b800c-3f5a-4ba9-ac9c-f9f1f1ada2f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LIB\Dump">
+      <UniqueIdentifier>{0b0aee64-1ddb-4b69-8ba8-46d6a0582f9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LIB\Log">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="LIB\DBConnector">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="LIB\LanServer">
+      <UniqueIdentifier>{581b0c7e-6de7-4ad5-98b8-988f68f74658}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LIB\NetServer">
+      <UniqueIdentifier>{c0f75618-1ebf-486a-8369-2d2b68cda064}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LIB\RingBuffer">
+      <UniqueIdentifier>{e865891c-d177-42ac-afb5-cd2a98ef1d77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LIB\Packet">
+      <UniqueIdentifier>{b5301b78-8c92-4d00-badf-b8b627e08ca2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LIB\MemoryPool">
+      <UniqueIdentifier>{ba0043e2-a0c9-4b73-8200-0e7a87a2a38e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MatchmakingServer">
+      <UniqueIdentifier>{5517c869-d37e-47ad-8fbf-09b72698f2a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LIB\URL">
+      <UniqueIdentifier>{8517be0c-0f46-49b5-981d-209e980834a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MatchmakingServer\Server">
+      <UniqueIdentifier>{e30afee2-f326-4b23-8cfc-178e42008f46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MatchmakingServer\Player">
+      <UniqueIdentifier>{52fedaeb-7361-4eb2-bd38-62407914226a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LIB\Parse">
+      <UniqueIdentifier>{749d4af2-79ff-409b-b3ab-0477a6b03e9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MatchmakingServer\Config">
+      <UniqueIdentifier>{d7bef5f9-fea6-45f0-a991-2148435d0aa9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CommonProtocol.h">
+      <Filter>MatchmakingServer</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
