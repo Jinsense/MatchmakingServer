@@ -33,9 +33,6 @@
     <Filter Include="MatchmakingServer">
       <UniqueIdentifier>{5517c869-d37e-47ad-8fbf-09b72698f2a3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="LIB\URL">
-      <UniqueIdentifier>{8517be0c-0f46-49b5-981d-209e980834a3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="MatchmakingServer\Server">
       <UniqueIdentifier>{e30afee2-f326-4b23-8cfc-178e42008f46}</UniqueIdentifier>
     </Filter>
@@ -48,13 +45,103 @@
     <Filter Include="MatchmakingServer\Config">
       <UniqueIdentifier>{d7bef5f9-fea6-45f0-a991-2148435d0aa9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LIB\HttpURL">
+      <UniqueIdentifier>{8517be0c-0f46-49b5-981d-209e980834a3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="DBConnector.cpp">
+      <Filter>LIB\DBConnector</Filter>
+    </ClCompile>
+    <ClCompile Include="APIHook.cpp">
+      <Filter>LIB\Dump</Filter>
+    </ClCompile>
+    <ClCompile Include="Dump.cpp">
+      <Filter>LIB\Dump</Filter>
+    </ClCompile>
+    <ClCompile Include="Log.cpp">
+      <Filter>LIB\Log</Filter>
+    </ClCompile>
+    <ClCompile Include="LanServer.cpp">
+      <Filter>LIB\LanServer</Filter>
+    </ClCompile>
+    <ClCompile Include="NetServer.cpp">
+      <Filter>LIB\NetServer</Filter>
+    </ClCompile>
+    <ClCompile Include="Parse.cpp">
+      <Filter>LIB\Parse</Filter>
+    </ClCompile>
+    <ClCompile Include="Packet.cpp">
+      <Filter>LIB\Packet</Filter>
+    </ClCompile>
+    <ClCompile Include="RingBuffer.cpp">
+      <Filter>LIB\RingBuffer</Filter>
+    </ClCompile>
+    <ClCompile Include="Config.cpp">
+      <Filter>MatchmakingServer\Config</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>MatchmakingServer\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="HttpURL.cpp">
+      <Filter>LIB\HttpURL</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchServer.cpp">
+      <Filter>MatchmakingServer\Server</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonProtocol.h">
       <Filter>MatchmakingServer</Filter>
+    </ClInclude>
+    <ClInclude Include="DBConnector.h">
+      <Filter>LIB\DBConnector</Filter>
+    </ClInclude>
+    <ClInclude Include="APIHook.h">
+      <Filter>LIB\Dump</Filter>
+    </ClInclude>
+    <ClInclude Include="Dump.h">
+      <Filter>LIB\Dump</Filter>
+    </ClInclude>
+    <ClInclude Include="Log.h">
+      <Filter>LIB\Log</Filter>
+    </ClInclude>
+    <ClInclude Include="LanServer.h">
+      <Filter>LIB\LanServer</Filter>
+    </ClInclude>
+    <ClInclude Include="NetServer.h">
+      <Filter>LIB\NetServer</Filter>
+    </ClInclude>
+    <ClInclude Include="LockFreeQueue.h">
+      <Filter>LIB\MemoryPool</Filter>
+    </ClInclude>
+    <ClInclude Include="LockFreeStack.h">
+      <Filter>LIB\MemoryPool</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryPool.h">
+      <Filter>LIB\MemoryPool</Filter>
+    </ClInclude>
+    <ClInclude Include="Parse.h">
+      <Filter>LIB\Parse</Filter>
+    </ClInclude>
+    <ClInclude Include="Packet.h">
+      <Filter>LIB\Packet</Filter>
+    </ClInclude>
+    <ClInclude Include="RingBuffer.h">
+      <Filter>LIB\RingBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Config.h">
+      <Filter>MatchmakingServer\Config</Filter>
+    </ClInclude>
+    <ClInclude Include="HttpURL.h">
+      <Filter>LIB\HttpURL</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>MatchmakingServer\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchServer.h">
+      <Filter>MatchmakingServer\Server</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

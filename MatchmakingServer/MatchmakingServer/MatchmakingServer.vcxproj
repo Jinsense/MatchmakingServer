@@ -115,10 +115,39 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="APIHook.h" />
     <ClInclude Include="CommonProtocol.h" />
+    <ClInclude Include="Config.h" />
+    <ClInclude Include="HttpURL.h" />
+    <ClInclude Include="DBConnector.h" />
+    <ClInclude Include="Dump.h" />
+    <ClInclude Include="LanServer.h" />
+    <ClInclude Include="LockFreeQueue.h" />
+    <ClInclude Include="LockFreeStack.h" />
+    <ClInclude Include="Log.h" />
+    <ClInclude Include="MatchServer.h" />
+    <ClInclude Include="MemoryPool.h" />
+    <ClInclude Include="NetServer.h" />
+    <ClInclude Include="Packet.h" />
+    <ClInclude Include="Parse.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="RingBuffer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="APIHook.cpp" />
+    <ClCompile Include="Config.cpp" />
+    <ClCompile Include="HttpURL.cpp" />
+    <ClCompile Include="DBConnector.cpp" />
+    <ClCompile Include="Dump.cpp" />
+    <ClCompile Include="LanServer.cpp" />
+    <ClCompile Include="Log.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MatchServer.cpp" />
+    <ClCompile Include="NetServer.cpp" />
+    <ClCompile Include="Packet.cpp" />
+    <ClCompile Include="Parse.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="RingBuffer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
