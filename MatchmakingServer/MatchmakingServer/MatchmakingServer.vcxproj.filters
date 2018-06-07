@@ -15,9 +15,6 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="LIB\LanServer">
-      <UniqueIdentifier>{581b0c7e-6de7-4ad5-98b8-988f68f74658}</UniqueIdentifier>
-    </Filter>
     <Filter Include="LIB\NetServer">
       <UniqueIdentifier>{c0f75618-1ebf-486a-8369-2d2b68cda064}</UniqueIdentifier>
     </Filter>
@@ -48,6 +45,9 @@
     <Filter Include="LIB\HttpURL">
       <UniqueIdentifier>{8517be0c-0f46-49b5-981d-209e980834a3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LIB\LanClient">
+      <UniqueIdentifier>{581b0c7e-6de7-4ad5-98b8-988f68f74658}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -62,9 +62,6 @@
     </ClCompile>
     <ClCompile Include="Log.cpp">
       <Filter>LIB\Log</Filter>
-    </ClCompile>
-    <ClCompile Include="LanServer.cpp">
-      <Filter>LIB\LanServer</Filter>
     </ClCompile>
     <ClCompile Include="NetServer.cpp">
       <Filter>LIB\NetServer</Filter>
@@ -90,6 +87,9 @@
     <ClCompile Include="MatchServer.cpp">
       <Filter>MatchmakingServer\Server</Filter>
     </ClCompile>
+    <ClCompile Include="LanClient.cpp">
+      <Filter>LIB\LanClient</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonProtocol.h">
@@ -106,9 +106,6 @@
     </ClInclude>
     <ClInclude Include="Log.h">
       <Filter>LIB\Log</Filter>
-    </ClInclude>
-    <ClInclude Include="LanServer.h">
-      <Filter>LIB\LanServer</Filter>
     </ClInclude>
     <ClInclude Include="NetServer.h">
       <Filter>LIB\NetServer</Filter>
@@ -143,5 +140,13 @@
     <ClInclude Include="MatchServer.h">
       <Filter>MatchmakingServer\Server</Filter>
     </ClInclude>
+    <ClInclude Include="LanClient.h">
+      <Filter>LIB\LanClient</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="MatchingServer_Config.ini">
+      <Filter>MatchmakingServer</Filter>
+    </None>
   </ItemGroup>
 </Project>
