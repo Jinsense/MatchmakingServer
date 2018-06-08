@@ -374,7 +374,7 @@ void CNetServer::AcceptThread_Update()
 		InterlockedIncrement(&m_iAcceptTPS);
 		InterlockedIncrement(&m_iAcceptTotal);
 
-		OnConnectionRequest((WCHAR*)&_ClientAddr.sin_addr, _ClientAddr.sin_port);
+		OnConnectionRequest((WCHAR*)&_ClientAddr.sin_addr);
 
 		unsigned __int64 * _iSessionNum = GetIndex();
 		if (_iSessionNum == nullptr)

@@ -18,6 +18,7 @@ public:
 public:
 	//	NETWORK
 	int SERVER_NO;
+	UINT VER_CODE;
 
 	WCHAR BIND_IP[20];
 	int BIND_IP_SIZE;

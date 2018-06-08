@@ -204,6 +204,44 @@ bool CINIParse::GetValue(const char *szName, int *ipValue)
 	return false;
 }
 
+bool CINIParse::GetValue(const char *szName, UINT * ipValue)
+{
+	char *chpBuff, chBuff[256];
+	int iLength;
+
+	m_iBufferFocusPos = m_iBufferAreaStart;
+
+	while (GetNextWord(&chpBuff, &iLength))
+	{
+		memset(chBuff, 0, 256);
+		memcpy(chBuff, chpBuff, iLength);
+		if (0 == strcmp(szName, chBuff))
+		{
+			if (GetNextWord(&chpBuff, &iLength))
+			{
+				memset(chBuff, 0, 256);
+				memcpy(chBuff, chpBuff, iLength);
+
+				if (0 == strcmp(chBuff, "="))
+				{
+					if (GetNextWord(&chpBuff, &iLength))
+					{
+						memset(chBuff, 0, 256);
+						memcpy(chBuff, chpBuff, iLength);
+
+						*ipValue = atoi(chBuff);
+						return true;
+					}
+					return false;
+				}
+				//	기타 등등...
+			}
+			return false;
+		}
+	}
+	return false;
+}
+
 bool CINIParse::GetValue(const char *szName, float *fpValue)
 {
 	char *chpBuff, chBuff[256];

@@ -48,6 +48,9 @@
     <Filter Include="LIB\LanClient">
       <UniqueIdentifier>{581b0c7e-6de7-4ad5-98b8-988f68f74658}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LIB\Json">
+      <UniqueIdentifier>{19deb2c5-a978-4e05-86e2-0408f03b5708}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -89,6 +92,9 @@
     </ClCompile>
     <ClCompile Include="LanClient.cpp">
       <Filter>LIB\LanClient</Filter>
+    </ClCompile>
+    <ClCompile Include="Json.cpp">
+      <Filter>LIB\Json</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -142,6 +148,9 @@
     </ClInclude>
     <ClInclude Include="LanClient.h">
       <Filter>LIB\LanClient</Filter>
+    </ClInclude>
+    <ClInclude Include="Json.h">
+      <Filter>LIB\Json</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

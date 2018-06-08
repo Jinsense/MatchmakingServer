@@ -4,6 +4,7 @@
 #include <list>
 #include <map>
 
+#include "Config.h"
 #include "LanClient.h"
 #include "NetServer.h"
 #include "DBConnector.h"
@@ -73,6 +74,7 @@ public:
 	CLanClient *	_pMonitor;
 	CDBConnector	_AccountDB;
 	CSystemLog *	_pLog;
+	CConfig			_Config;
 
 protected:
 	SRWLOCK		_DB_srwlock;

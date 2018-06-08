@@ -19,6 +19,7 @@ public:
 	bool	ProvideArea(const char *szAreaName);
 	bool	GetValue(const char *szName, char *szValue, int *ipBuffSize);
 	bool	GetValue(const char *szName, int *ipValue);
+	bool	GetValue(const char *szName, UINT * ipValue);
 	bool	GetValue(const char *szName, float *fpValue);
 
 	void	UTF8toUTF16(const char *szText, WCHAR *szBuf, int iBufLen);
