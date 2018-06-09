@@ -157,5 +157,6 @@
     <None Include="MatchingServer_Config.ini">
       <Filter>MatchmakingServer</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
