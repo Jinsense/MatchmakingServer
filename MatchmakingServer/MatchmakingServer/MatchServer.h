@@ -72,7 +72,7 @@ private:
 public:
 	CLanClient *	_pMaster;
 	CLanClient *	_pMonitor;
-	CDBConnector	_AccountDB;
+	CDBConnector	_StatusDB;
 	CSystemLog *	_pLog;
 	CConfig			_Config;
 

@@ -25,7 +25,7 @@ CLanClient::~CLanClient()
 	delete m_Session;
 }
 
-void CLanClient::Constructor(CMatchmakingServer *pMatching)
+void CLanClient::Constructor(CMatchServer *pMatching)
 {
 	_pMatchingServer = pMatching;
 	return;

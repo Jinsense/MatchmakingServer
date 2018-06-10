@@ -16,6 +16,10 @@ int main()
 	if (false == Server._Config.Set())
 		return false;
 	//-----------------------------------------------------------
+	// MatchServer Status DB 연결
+	//-----------------------------------------------------------
+	
+	//-----------------------------------------------------------
 	// 모니터링 서버 연결
 	//-----------------------------------------------------------
 	if (false == Server._pMonitor->Connect(Server._Config.MONITOR_IP, Server._Config.MONITOR_PORT, true, LANCLIENT_WORKERTHREAD))
