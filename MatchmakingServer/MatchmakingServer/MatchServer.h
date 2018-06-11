@@ -10,6 +10,27 @@
 #include "DBConnector.h"
 #include "Player.h"
 
+#include <cpprest\http_client.h>		
+#include <cpprest\filestream.h>			
+
+#include "../json/include/rapidjson/document.h"
+#include "../json/include/rapidjson/writer.h"
+#include "../json/include/rapidjson/stringbuffer.h"
+
+#pragma comment(lib, "cpprest120_2_4")	// Windows Only
+using namespace utility;                    // Common utilities like string conversions
+using namespace web;                        // Common features like URIs.
+using namespace web::http;                  // Common HTTP functionality
+using namespace web::http::client;          // HTTP client features
+using namespace concurrency::streams;       // Asynchronous streams
+using namespace rapidjson;
+using namespace std;
+
+#define		SET_CLIENTKEY(ServerNo, ClientID)		ServerNo = ServerNo << 48; ClientID = ServerNo | ClientID;
+
+
+StringBuffer StringJSON;
+Writer<StringBuffer, UTF16<>> writer(StringJSON);
 
 class CLanClient;
 
@@ -36,35 +57,39 @@ protected:
 	//	매칭 status DB에 타임스탬프 갱신 쿼리 보내는 함수
 
 public:
+	//-----------------------------------------------------------
+	//	사용자 함수
+	//-----------------------------------------------------------
 	void	ConfigSet();
 	void	UTF8toUTF16(const char *szText, WCHAR *szBuf, int iBufLen);
 	void	UTF16toUTF8(WCHAR *szText, char *szBuf, int iBufLen);
+	bool	MatchDBSet();
 
-	/////////////////////////////////////////////////////////////
+	//-----------------------------------------------------------
 	// OnClientJoin, OnClientLeave 에서 호출
-	/////////////////////////////////////////////////////////////
+	//-----------------------------------------------------------
 	bool	InsertPlayer(unsigned __int64 iClientID);
 	bool	RemovePlayer(unsigned __int64 iClientID);
 
-	/////////////////////////////////////////////////////////////
+	//-----------------------------------------------------------
 	// OnRecv 에서 로그인인증 처리 후 사용,  UpdateThread 에서 일정시간 지난 유저에 사용.
-	/////////////////////////////////////////////////////////////
+	//-----------------------------------------------------------
 	bool	DisconnectPlayer(unsigned __int64 iClientID, BYTE byStatus);
 
-	/////////////////////////////////////////////////////////////
+	//-----------------------------------------------------------
 	// 접속 사용자 수 
-	/////////////////////////////////////////////////////////////
+	//-----------------------------------------------------------
 	int		GetPlayerCount(void);
 
-	/////////////////////////////////////////////////////////////
+	//-----------------------------------------------------------
 	// 접속한 플레이어 찾기 
-	/////////////////////////////////////////////////////////////
-//	PLAYER*	FindPlayer_ClientID(unsigned __int64 iClientID);
+	//-----------------------------------------------------------
+	CPlayer*	FindPlayer_ClientID(unsigned __int64 iClientID);
 //	PLAYER*	FindPlayer_AccountNo(INT64 AccountNo);
 
-	/////////////////////////////////////////////////////////////
+	//-----------------------------------------------------------
 	// White IP 관련
-	/////////////////////////////////////////////////////////////
+	//-----------------------------------------------------------
 
 private:
 	virtual void	MonitorThread_Update();
@@ -78,6 +103,7 @@ public:
 
 protected:
 	SRWLOCK		_DB_srwlock;
+
 
 	//-------------------------------------------------------------
 	// 접속자 관리.
