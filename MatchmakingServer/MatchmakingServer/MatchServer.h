@@ -3,15 +3,17 @@
 
 #include <list>
 #include <map>
+#include <WinInet.h>
+
+#include <cpprest\http_client.h>		
+#include <cpprest\filestream.h>	
 
 #include "Config.h"
 #include "LanClient.h"
 #include "NetServer.h"
 #include "DBConnector.h"
-#include "Player.h"
-
-#include <cpprest\http_client.h>		
-#include <cpprest\filestream.h>			
+#include "Player.h"	
+#include "ShDB_ErrorCode.h"
 
 #include "../json/include/rapidjson/document.h"
 #include "../json/include/rapidjson/writer.h"
@@ -31,6 +33,15 @@ using namespace std;
 
 StringBuffer StringJSON;
 Writer<StringBuffer, UTF16<>> writer(StringJSON);
+
+enum en_RES_LOGIN
+{
+	SUCCESS = 1,
+	SESSIONKEY_ERROR = 2,
+	ACCOUNTNO_NOT_EXIST = 3,
+	ETC_ERROR = 4,
+	VER_ERROR = 5,
+};
 
 class CLanClient;
 
@@ -61,20 +72,20 @@ public:
 	//	사용자 함수
 	//-----------------------------------------------------------
 	void	ConfigSet();
-	void	UTF8toUTF16(const char *szText, WCHAR *szBuf, int iBufLen);
-	void	UTF16toUTF8(WCHAR *szText, char *szBuf, int iBufLen);
+	void	UTF8toUTF16(const char *szText, WCHAR *szBuf, int BufLen);
+	void	UTF16toUTF8(WCHAR *szText, char *szBuf, int BufLen);
 	bool	MatchDBSet();
 
 	//-----------------------------------------------------------
 	// OnClientJoin, OnClientLeave 에서 호출
 	//-----------------------------------------------------------
-	bool	InsertPlayer(unsigned __int64 iClientID);
-	bool	RemovePlayer(unsigned __int64 iClientID);
+	bool	InsertPlayer(unsigned __int64 ClientID, CPlayer* pPlayer);
+	bool	RemovePlayer(unsigned __int64 ClientID);
 
 	//-----------------------------------------------------------
-	// OnRecv 에서 로그인인증 처리 후 사용,  UpdateThread 에서 일정시간 지난 유저에 사용.
+	// TimeOut 유저 끊기
 	//-----------------------------------------------------------
-	bool	DisconnectPlayer(unsigned __int64 iClientID, BYTE byStatus);
+	bool	DisconnectPlayer(unsigned __int64 ClientID, INT64 AccountNo);
 
 	//-----------------------------------------------------------
 	// 접속 사용자 수 
@@ -84,7 +95,7 @@ public:
 	//-----------------------------------------------------------
 	// 접속한 플레이어 찾기 
 	//-----------------------------------------------------------
-	CPlayer*	FindPlayer_ClientID(unsigned __int64 iClientID);
+	CPlayer*	FindPlayer_ClientID(unsigned __int64 ClientID);
 //	PLAYER*	FindPlayer_AccountNo(INT64 AccountNo);
 
 	//-----------------------------------------------------------

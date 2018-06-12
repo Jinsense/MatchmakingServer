@@ -843,7 +843,8 @@ enum en_PACKET_TYPE
 	//	{
 	//		WORD	Type
 	//
-	//		BYTE	Status			1 : 성공
+	//		BYTE	Status			
+	//								1 : 성공
 	//								2 : 세션키 오류
 	//								3 : AccountNo 없음
 	//								4 : 기타 오류

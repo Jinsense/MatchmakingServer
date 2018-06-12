@@ -51,6 +51,9 @@
     <Filter Include="LIB\Json">
       <UniqueIdentifier>{19deb2c5-a978-4e05-86e2-0408f03b5708}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MatchmakingServer\Common">
+      <UniqueIdentifier>{da0768a1-173d-447d-86dd-63a5cb27e367}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -98,9 +101,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CommonProtocol.h">
-      <Filter>MatchmakingServer</Filter>
-    </ClInclude>
     <ClInclude Include="DBConnector.h">
       <Filter>LIB\DBConnector</Filter>
     </ClInclude>
@@ -152,11 +152,17 @@
     <ClInclude Include="Json.h">
       <Filter>LIB\Json</Filter>
     </ClInclude>
+    <ClInclude Include="CommonProtocol.h">
+      <Filter>MatchmakingServer\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="ShDB_ErrorCode.h">
+      <Filter>MatchmakingServer\Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="MatchingServer_Config.ini">
-      <Filter>MatchmakingServer</Filter>
-    </None>
     <None Include="packages.config" />
+    <None Include="MatchingServer_Config.ini">
+      <Filter>MatchmakingServer\Common</Filter>
+    </None>
   </ItemGroup>
 </Project>

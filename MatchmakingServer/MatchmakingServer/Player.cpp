@@ -18,5 +18,6 @@ bool CPlayer::Init()
 	_ClientKey = NULL;
 	_Status = NULL;
 	ZeroMemory(_SessionKey, sizeof(_SessionKey));
+	ZeroMemory(_ClientIP, sizeof(_ClientIP));
 	return true;
 }

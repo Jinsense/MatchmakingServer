@@ -312,6 +312,12 @@ CPacket& CPacket::operator<<(__int64 Value)
 	return *this;
 }
 
+CPacket& CPacket::operator<<(unsigned __int64 Value)
+{
+	PushData((char*)&Value, sizeof(Value));
+	return *this;
+}
+
 CPacket& CPacket::operator<<(double Value)
 {
 	PushData((char*)&Value, sizeof(Value));
@@ -373,6 +379,12 @@ CPacket& CPacket::operator >> (float& Value)
 }
 
 CPacket& CPacket::operator >> (__int64& Value)
+{
+	PopData((char*)&Value, sizeof(Value));
+	return *this;
+}
+
+CPacket& CPacket::operator >> (unsigned __int64& Value)
 {
 	PopData((char*)&Value, sizeof(Value));
 	return *this;

@@ -22,7 +22,7 @@ struct st_SessionInfo
 		iClientID(NULL) {}
 
 	unsigned __int64 iClientID;
-	in_addr		SessionIP;
+	char	IP[20] = { 0, };
 };
 
 struct st_IO_RELEASE_COMPARE

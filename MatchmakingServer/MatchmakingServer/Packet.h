@@ -106,6 +106,7 @@ public:
 	CPacket& operator<<(unsigned long Value);
 	CPacket& operator<<(float Value);
 	CPacket& operator<<(__int64 Value);
+	CPacket& operator<<(unsigned __int64 Value);
 	CPacket& operator<<(double Value);
 
 	CPacket& operator >> (char& Value);
@@ -118,6 +119,7 @@ public:
 	CPacket& operator >> (unsigned long& Value);
 	CPacket& operator >> (float& Value);
 	CPacket& operator >> (__int64& Value);
+	CPacket& operator >> (unsigned __int64& Value);
 	CPacket& operator >> (double& Value);
 
 public:

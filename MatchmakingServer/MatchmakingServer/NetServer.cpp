@@ -441,6 +441,7 @@ void CNetServer::AcceptThread_Update()
 			InterlockedExchange(&pSessionArray[*_iSessionNum].lSendCount, 0);
 		pSessionArray[*_iSessionNum].Info.iClientID =
 			pSessionArray[*_iSessionNum].iClientID;
+		inet_ntop(AF_INET, &_ClientAddr.sin_addr, pSessionArray[*_iSessionNum].Info.IP, sizeof(pSessionArray[*_iSessionNum].Info.IP));
 
 		CreateIoCompletionPort((HANDLE)clientSock, m_hIOCP,
 			(ULONG_PTR)&pSessionArray[*_iSessionNum], 0);
