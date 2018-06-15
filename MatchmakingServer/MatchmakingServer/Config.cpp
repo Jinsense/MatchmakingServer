@@ -15,8 +15,13 @@ CConfig::CConfig()
 	MASTER_IP_SIZE = eNUM_BUF;
 	MASTER_PORT = NULL;
 
-	WORKER_THREAD = NULL;
+	ZeroMemory(&APISERVER_IP, sizeof(APISERVER_IP));
+	APISERVER_IP_SIZE = 3 * eNUM_BUF;
 
+	WORKER_THREAD = NULL;
+	DB_TIME_UPDATE = NULL;
+	USER_TIMEOUT = NULL;
+	USER_CHANGE = NULL;
 	CLIENT_MAX = NULL;
 	PACKET_CODE = NULL;
 	PACKET_KEY1 = NULL;
@@ -67,11 +72,18 @@ bool CConfig::Set()
 	_Parse.GetValue("MASTER_IP", &IP[0], &MASTER_IP_SIZE);
 	_Parse.UTF8toUTF16(IP, MASTER_IP, sizeof(MASTER_IP));
 	_Parse.GetValue("MASTER_PORT", &MASTER_PORT);
-	res = _Parse.GetValue("WORKER_THREAD", &WORKER_THREAD);
+	res = _Parse.GetValue("APISERVER_IP", &IP[0], &APISERVER_IP_SIZE);
+	_Parse.UTF8toUTF16(IP, APISERVER_IP, sizeof(APISERVER_IP));
 	if (false == res)
 		return false;
 
 	_Parse.ProvideArea("SYSTEM");
+	res = _Parse.GetValue("WORKER_THREAD", &WORKER_THREAD);
+	if (false == res)
+		return false;
+	_Parse.GetValue("DB_TIME_UPDATE", &DB_TIME_UPDATE);
+	_Parse.GetValue("USER_TIMEOUT", &USER_TIMEOUT);
+	_Parse.GetValue("USER_CHANGE", &USER_CHANGE);
 	_Parse.GetValue("CLIENT_MAX", &CLIENT_MAX);
 	_Parse.GetValue("PACKET_CODE", &PACKET_CODE);
 	_Parse.GetValue("PACKET_KEY1", &PACKET_KEY1);

@@ -32,9 +32,14 @@ public:
 	int MONITOR_IP_SIZE;
 	int MONITOR_PORT;
 
-	int WORKER_THREAD;
+	WCHAR APISERVER_IP[60];
+	int APISERVER_IP_SIZE;
 
 	//	SYSTEM
+	int WORKER_THREAD;
+	int	DB_TIME_UPDATE;
+	int USER_TIMEOUT;
+	int USER_CHANGE;
 	int CLIENT_MAX;
 	int PACKET_CODE;
 	int PACKET_KEY1;
@@ -55,7 +60,7 @@ public:
 	CINIParse _Parse;
 
 private:
-	char IP[20];
+	char IP[60];
 };
 
 #endif

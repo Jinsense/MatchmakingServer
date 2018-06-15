@@ -3,9 +3,11 @@
 
 #include <list>
 #include <map>
+#include <windows.h>
 #include <WinInet.h>
+#include <chrono>
 
-#include <cpprest\http_client.h>		
+#include <cpprest\http_client.h>
 #include <cpprest\filestream.h>	
 
 #include "Config.h"
@@ -19,7 +21,7 @@
 #include "../json/include/rapidjson/writer.h"
 #include "../json/include/rapidjson/stringbuffer.h"
 
-#pragma comment(lib, "cpprest120_2_4")	// Windows Only
+#pragma comment(lib, "cpprest120_2_4")		// Windows Only
 using namespace utility;                    // Common utilities like string conversions
 using namespace web;                        // Common features like URIs.
 using namespace web::http;                  // Common HTTP functionality
@@ -28,7 +30,7 @@ using namespace concurrency::streams;       // Asynchronous streams
 using namespace rapidjson;
 using namespace std;
 
-#define		SET_CLIENTKEY(ServerNo, ClientID)		ServerNo = ServerNo << 48; ClientID = ServerNo | ClientID;
+#define		SET_CLIENTKEY(ServerNo, ClientID)		ServerNo = ServerNo << 24; ClientID = ServerNo | ClientID;
 
 
 StringBuffer StringJSON;
@@ -36,7 +38,7 @@ Writer<StringBuffer, UTF16<>> writer(StringJSON);
 
 enum en_RES_LOGIN
 {
-	SUCCESS = 1,
+	LOGIN_SUCCESS = 1,
 	SESSIONKEY_ERROR = 2,
 	ACCOUNTNO_NOT_EXIST = 3,
 	ETC_ERROR = 4,
@@ -66,6 +68,18 @@ protected:
 	//-----------------------------------------------------------
 	//	접속 중인 사용자 타임아웃 함수
 	//	매칭 status DB에 타임스탬프 갱신 쿼리 보내는 함수
+	static unsigned int WINAPI HeartbeatThread(LPVOID arg)
+	{
+		CMatchServer *_pHeartbeatThread = (CMatchServer *)arg;
+		if (NULL == _pHeartbeatThread)
+		{
+			wprintf(L"[Server :: HeartbeatThread] Init Error\n");
+			return false;
+		}
+		_pHeartbeatThread->HeartbeatThread_Update();
+		return true;
+	}
+	void	HeartbeatThread_Update();
 
 public:
 	//-----------------------------------------------------------
@@ -114,7 +128,7 @@ public:
 
 protected:
 	SRWLOCK		_DB_srwlock;
-
+	HANDLE		_HeartbeatThread;
 
 	//-------------------------------------------------------------
 	// 접속자 관리.

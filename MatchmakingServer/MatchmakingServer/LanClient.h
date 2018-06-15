@@ -34,7 +34,7 @@ typedef struct st_Client
 		IO_Count(0) {}
 }LANSESSION;
 
-class CMatchmakingServer;
+class CMatchServer;
 
 class CLanClient
 {

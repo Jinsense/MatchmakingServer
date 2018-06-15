@@ -3,7 +3,7 @@
 
 //#include "../mysql/include/mysql.h"
 //#include "../mysql/include/errmsg.h"
-#include "DB_Connector.h"
+#include "DBConnector.h"
 
 //#pragma comment(lib, "libmysql.lib")
 //#pragma comment(lib, "/vs14/mysqlclient.lib")
@@ -144,6 +144,7 @@ bool CDBConnector::Query_Save(WCHAR * szStringFormat, ...)
 			else
 			{
 				SaveLastError();
+				FreeResult();
 				return false;
 			}
 		}

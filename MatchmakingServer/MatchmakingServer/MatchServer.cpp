@@ -121,7 +121,8 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 		json::value PostData;
 		json::value ResData;
 		PostData[L"accountno"] = json::value::number(pPlayer->_AccountNo);
-		http_client Client(L"http://172.16.2.2:11701/select_account.php");
+//		http_client Client(L"http://172.16.2.2:11701/select_account.php");
+		http_client Client(_Config.APISERVER_IP);
 		Client.request(methods::POST, L"", PostData.to_string().c_str(),
 			L"application/json").then([&ResData](http_response response)
 		{
@@ -132,9 +133,9 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 			}
 		});
 		//	result 값 확인
-		if (SUCCESS != ResData[L"result"].number)
+		if (SUCCESS != ResData[L"result"].as_integer())
 		{
-			if (NOT_JOIN == ResData[L"result"].number)
+			if (NOT_JOIN == ResData[L"result"].as_integer())
 				BYTE Status = ACCOUNTNO_NOT_EXIST;
 			else
 				BYTE Status = ETC_ERROR;
@@ -146,13 +147,13 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 			newPacket->Free();
 			return true;
 		}
-		if (0 != strcmp(ResData[L"sessionkey"].string, pPlayer->_SessionKey))
+//		if (0 != strcmp(ResData[L"sessionkey"].as_string(), pPlayer->_SessionKey))
 //		{
 
 //		}
-//		char sessionkey[64] = { 0, };
-//		memcpy_s(&sessionkey, sizeof(ResData[L"sessionkey"]), &ResData[L"sessionkey"], sizeof(ResData[L"sessionkey"]));
-//		if (0 != strcmp(sessionkey, pPlayer->_SessionKey))
+		char sessionkey[64] = { 0, };
+		memcpy_s(&sessionkey, sizeof(ResData[L"sessionkey"]), &ResData[L"sessionkey"], sizeof(ResData[L"sessionkey"]));
+		if (0 != strcmp(sessionkey, pPlayer->_SessionKey))
 		{
 			//	세션키가 다름 응답 후 끊기
 			CPacket * newPacket = CPacket::Alloc();
@@ -167,7 +168,7 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 		//	전부 맞다면 로그인 응답 패킷을 보내준다.
 		CPacket * newPacket = CPacket::Alloc();
 		Type = en_PACKET_CS_MATCH_RES_LOGIN;
-		BYTE Status = SUCCESS;
+		BYTE Status = LOGIN_SUCCESS;
 		*newPacket << Type << Status;
 		SendPacket(pPlayer->_ClientID, newPacket);
 		newPacket->Free();
@@ -214,6 +215,49 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 	return true;
 }
 
+void CMatchServer::HeartbeatThread_Update()
+{
+	//-------------------------------------------------------------
+	//	Heartbeat Thread
+	//	StatusDB에 일정시간마다 현재 매치서버 Timestamp 값 갱신
+	//	전체 유저 대상으로 Heartbeat 기준으로 TimeOut 체크 
+	//	현재 유저가 범위 이상 변화가 발생했을 때 DB에 connectuser 값 갱신
+	//-------------------------------------------------------------
+	UINT64 start = GetTickCount64();
+	int count = GetPlayerCount();
+	int usercount = NULL;
+	while (1)
+	{
+		Sleep(1000);
+		UINT64 now = GetTickCount64();
+		if (now - start > _Config.DB_TIME_UPDATE)
+		{
+			if (false == _StatusDB.Query_Save(L"update `server` set `heartbeat` = now() where serverno = %d", _Config.SERVER_NO))
+				_pLog->Log(const_cast<WCHAR*>(L"Error"), LOG_SYSTEM, const_cast<WCHAR*>(L"STATUS DB HEARTBEAT UPDATE FAIL [ServerNo : %d]"), _Config.SERVER_NO);
+			else
+				start = GetTickCount64();
+		}
+		AcquireSRWLockExclusive(&_PlayerMap_srwlock);
+		for (auto i = _PlayerMap.begin(); i != _PlayerMap.end(); i++)
+		{
+			if (now - i->second->_Time > _Config.USER_TIMEOUT)
+			{
+				_pLog->Log(const_cast<WCHAR*>(L"Error"), LOG_SYSTEM, const_cast<WCHAR*>(L"USER TIMEOUT : %d [AccountNo : %d]"), now - i->second->_Time, i->second->_AccountNo);
+				Disconnect(i->second->_ClientID);
+			}
+		}
+		ReleaseSRWLockExclusive(&_PlayerMap_srwlock);
+		usercount = GetPlayerCount();
+		if (_Config.USER_CHANGE < abs(count - usercount))
+		{
+			if (false == _StatusDB.Query_Save(L"update `server` set `connectuser` = %d where serverno = %d", usercount, _Config.SERVER_NO))
+			{
+				_pLog->Log(const_cast<WCHAR*>(L"Error"), LOG_SYSTEM, const_cast<WCHAR*>(L"STATUS DB CONNECTUSER UPDATE FAIL [ServerNo : %d]"), _Config.SERVER_NO);
+			}
+		}
+	}
+}
+
 void CMatchServer::ConfigSet()
 {
 	//-------------------------------------------------------------
@@ -248,7 +292,26 @@ bool CMatchServer::MatchDBSet()
 	//-------------------------------------------------------------
 	//	Matchmaking Status DB에 매칭서버 정보 insert / update
 	//-------------------------------------------------------------
+	//	현재 자신의 IP를 구한다.
+	IN_ADDR myip = GetMyIPAddress();
 
+	//	기존 서버번호가 있는 경우 INSERT 에러 발생
+	bool bRes = _StatusDB.Query_Save(L"INSERT INTO `server` (`serverno`, `ip`, `port`, `connectuser`, `heartbeat` ) VALUES (%d, %s, $d, NOW())", _Config.SERVER_NO, myip, _Config.BIND_PORT, GetPlayerCount());
+	if (false == bRes)
+	{
+		bRes = _StatusDB.Query_Save(L"UPDATE `server` set `ip` = %s, `port` = %d, `connectuser` = %d, `heartbeat` = NOW() where `serverno` = %d", myip, _Config.BIND_PORT, GetPlayerCount(), _Config.SERVER_NO);
+		if (false == bRes)
+		{
+			//	Status DB에 매치서버 등록 실패
+			_pLog->Log(const_cast<WCHAR*>(L"Error"), LOG_SYSTEM, const_cast<WCHAR*>(L"STATUS DB INSERT/UPDATE FAIL"));
+			g_CrashDump->Crash();
+		}
+	}
+
+	//	하트비트 스레드 생성
+	_HeartbeatThread = (HANDLE)_beginthreadex(NULL, 0, &HeartbeatThread,
+		(LPVOID)this, 0, NULL);
+	wprintf(L"[Server :: Server_Start]	HeartbeatThread Create\n");
 	return true;
 }
 
@@ -311,5 +374,43 @@ void CMatchServer::MonitorThread_Update()
 	//
 	//	모니터링 항목들
 	//-------------------------------------------------------------
+	wprintf(L"\n");
+	struct tm *t = new struct tm;
+	time_t timer;
+	timer = time(NULL);
+	localtime_s(t, &timer);
+
+	int year = t->tm_year + 1900;
+	int month = t->tm_mon + 1;
+	int day = t->tm_mday;
+	int hour = t->tm_hour;
+	int min = t->tm_min;
+	int sec = t->tm_sec;
+
+	while (!m_bShutdown)
+	{
+		Sleep(1000);
+		timer = time(NULL);
+		localtime(NULL);
+
+		if (true == m_bMonitorFlag)
+		{
+			wprintf(L"	[ServerStart : %d/%d/%d %d:%d:%d]\n\n", year, month, day, hour, min, sec);
+			wprintf(L"	[%d/%d/%d %d:%d:%d]\n\n", t->tm_year + 1900, t->tm_mon + 1,
+				t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
+			wprintf(L"	ConnectSession			:	%I64d	\n", m_iConnectClient);
+			wprintf(L"	PlayerMapCount			:	%d		\n", GetPlayerCount());
+			wprintf(L"	PacketPool_AllocCount		:	%d	\n", CPacket::GetAllocPool());
+			wprintf(L"	PlayerPool_AllocCount		:	%d	\n", _PlayerPool->GetAllocCount());
+			wprintf(L"	Match_Accept_Total		:	%I64d	\n", m_iAcceptTotal);
+			wprintf(L"	Match_Accept_TPS		:	%I64d	\n", m_iAcceptTPS);
+			wprintf(L"	Match_SendPacket_TPS		:	%I64d	\n", m_iSendPacketTPS);
+			wprintf(L"	Match_RecvPacket_TPS		:	%I64d	\n\n", m_iRecvPacketTPS);
+		}
+		m_iAcceptTPS = 0;
+		m_iRecvPacketTPS = 0;
+		m_iSendPacketTPS = 0;
+	}
+
 	return;
 }

@@ -1,6 +1,9 @@
 #ifndef _MATCHINGSERVER_LIB_NETSERVER_H_
 #define _MATCHINGSERVER_LIB_NETSERVER_H_
 
+#include <atlstr.h>
+
+
 #include "CommonProtocol.h"
 #include "Packet.h"
 #include "RingBuffer.h"
@@ -71,6 +74,7 @@ public:
 	virtual void		OnError(int iErrorCode, WCHAR *pError) = 0;
 	virtual bool		OnRecv(unsigned __int64 iClientID, CPacket *pPacket) = 0;
 	unsigned __int64	GetClientCount();
+	IN_ADDR				GetMyIPAddress();
 
 	bool				ServerStart(WCHAR *pOpenIP, int iPort, int iMaxWorkerThread,
 		bool bNodelay, int iMaxSession);
