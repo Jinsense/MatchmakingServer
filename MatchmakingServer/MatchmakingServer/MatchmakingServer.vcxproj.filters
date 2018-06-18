@@ -42,14 +42,8 @@
     <Filter Include="MatchmakingServer\Config">
       <UniqueIdentifier>{d7bef5f9-fea6-45f0-a991-2148435d0aa9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="LIB\HttpURL">
-      <UniqueIdentifier>{8517be0c-0f46-49b5-981d-209e980834a3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="LIB\LanClient">
       <UniqueIdentifier>{581b0c7e-6de7-4ad5-98b8-988f68f74658}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="LIB\Json">
-      <UniqueIdentifier>{19deb2c5-a978-4e05-86e2-0408f03b5708}</UniqueIdentifier>
     </Filter>
     <Filter Include="MatchmakingServer\Common">
       <UniqueIdentifier>{da0768a1-173d-447d-86dd-63a5cb27e367}</UniqueIdentifier>
@@ -87,17 +81,11 @@
     <ClCompile Include="Player.cpp">
       <Filter>MatchmakingServer\Player</Filter>
     </ClCompile>
-    <ClCompile Include="HttpURL.cpp">
-      <Filter>LIB\HttpURL</Filter>
-    </ClCompile>
     <ClCompile Include="MatchServer.cpp">
       <Filter>MatchmakingServer\Server</Filter>
     </ClCompile>
     <ClCompile Include="LanClient.cpp">
       <Filter>LIB\LanClient</Filter>
-    </ClCompile>
-    <ClCompile Include="Json.cpp">
-      <Filter>LIB\Json</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -137,9 +125,6 @@
     <ClInclude Include="Config.h">
       <Filter>MatchmakingServer\Config</Filter>
     </ClInclude>
-    <ClInclude Include="HttpURL.h">
-      <Filter>LIB\HttpURL</Filter>
-    </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>MatchmakingServer\Player</Filter>
     </ClInclude>
@@ -148,9 +133,6 @@
     </ClInclude>
     <ClInclude Include="LanClient.h">
       <Filter>LIB\LanClient</Filter>
-    </ClInclude>
-    <ClInclude Include="Json.h">
-      <Filter>LIB\Json</Filter>
     </ClInclude>
     <ClInclude Include="CommonProtocol.h">
       <Filter>MatchmakingServer\Common</Filter>

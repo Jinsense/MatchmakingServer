@@ -77,6 +77,10 @@
     <IncludePath>$(SolutionDir)mysql\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)mysql\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(SolutionDir)mysql\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)cpprestsdk;$(SolutionDir)mysql\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -91,10 +95,11 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
-      <PreprocessorDefinitions>CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CURL_STATICLIB;_WINSOCK_DEPRECATED_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>ws2_32.lib, wldap32.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;wldap32.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -131,10 +136,8 @@
     <ClInclude Include="APIHook.h" />
     <ClInclude Include="CommonProtocol.h" />
     <ClInclude Include="Config.h" />
-    <ClInclude Include="HttpURL.h" />
     <ClInclude Include="DBConnector.h" />
     <ClInclude Include="Dump.h" />
-    <ClInclude Include="Json.h" />
     <ClInclude Include="LanClient.h" />
     <ClInclude Include="LockFreeQueue.h" />
     <ClInclude Include="LockFreeStack.h" />
@@ -151,10 +154,8 @@
   <ItemGroup>
     <ClCompile Include="APIHook.cpp" />
     <ClCompile Include="Config.cpp" />
-    <ClCompile Include="HttpURL.cpp" />
     <ClCompile Include="DBConnector.cpp" />
     <ClCompile Include="Dump.cpp" />
-    <ClCompile Include="Json.cpp" />
     <ClCompile Include="LanClient.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="main.cpp" />

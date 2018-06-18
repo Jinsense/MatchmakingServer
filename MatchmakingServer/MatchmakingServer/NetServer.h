@@ -3,7 +3,6 @@
 
 #include <atlstr.h>
 
-
 #include "CommonProtocol.h"
 #include "Packet.h"
 #include "RingBuffer.h"

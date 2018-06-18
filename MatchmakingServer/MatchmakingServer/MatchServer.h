@@ -17,24 +17,16 @@
 #include "Player.h"	
 #include "ShDB_ErrorCode.h"
 
-#include "../json/include/rapidjson/document.h"
-#include "../json/include/rapidjson/writer.h"
-#include "../json/include/rapidjson/stringbuffer.h"
-
-#pragma comment(lib, "cpprest120_2_4")		// Windows Only
+//	#pragma comment(lib, "cpprest120_2_4")		// Windows Only
 using namespace utility;                    // Common utilities like string conversions
 using namespace web;                        // Common features like URIs.
 using namespace web::http;                  // Common HTTP functionality
 using namespace web::http::client;          // HTTP client features
 using namespace concurrency::streams;       // Asynchronous streams
-using namespace rapidjson;
 using namespace std;
 
 #define		SET_CLIENTKEY(ServerNo, ClientID)		ServerNo = ServerNo << 24; ClientID = ServerNo | ClientID;
 
-
-StringBuffer StringJSON;
-Writer<StringBuffer, UTF16<>> writer(StringJSON);
 
 enum en_RES_LOGIN
 {

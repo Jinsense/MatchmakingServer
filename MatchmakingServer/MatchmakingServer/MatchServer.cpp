@@ -123,7 +123,7 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 		PostData[L"accountno"] = json::value::number(pPlayer->_AccountNo);
 //		http_client Client(L"http://172.16.2.2:11701/select_account.php");
 		http_client Client(_Config.APISERVER_IP);
-		Client.request(methods::POST, L"", PostData.to_string().c_str(),
+		Client.request(methods::POST, L"", PostData.as_string().c_str(),
 			L"application/json").then([&ResData](http_response response)
 		{
 			if (response.status_code() == status_codes::OK)
@@ -391,7 +391,7 @@ void CMatchServer::MonitorThread_Update()
 	{
 		Sleep(1000);
 		timer = time(NULL);
-		localtime(NULL);
+		localtime_s(t, &timer);
 
 		if (true == m_bMonitorFlag)
 		{
@@ -411,6 +411,6 @@ void CMatchServer::MonitorThread_Update()
 		m_iRecvPacketTPS = 0;
 		m_iSendPacketTPS = 0;
 	}
-
+	delete t;
 	return;
 }

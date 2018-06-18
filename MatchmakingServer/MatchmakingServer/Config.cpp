@@ -49,7 +49,7 @@ CConfig::~CConfig()
 bool CConfig::Set()
 {
 	bool res = true;
-	res = _Parse.LoadFile(L"MatchmakingServer_Config.ini");
+	res = _Parse.LoadFile(L"MatchingServer_Config.ini");
 	if (false == res)
 		return false;
 	res = _Parse.ProvideArea("NETWORK");
