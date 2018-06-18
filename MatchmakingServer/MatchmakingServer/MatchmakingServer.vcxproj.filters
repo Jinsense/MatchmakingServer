@@ -146,5 +146,6 @@
     <None Include="MatchingServer_Config.ini">
       <Filter>MatchmakingServer\Common</Filter>
     </None>
+    <None Include="libmysql.dll" />
   </ItemGroup>
 </Project>
