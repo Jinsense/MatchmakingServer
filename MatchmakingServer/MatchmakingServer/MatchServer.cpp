@@ -183,11 +183,29 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 	//-------------------------------------------------------------
 	else if (en_PACKET_CS_MATCH_REQ_GAME_ROOM == Type)
 	{
-		//	마스터 서버에 방 정보 요청을 보냄
-		CPacket *newPacket = CPacket::Alloc();
-		Type = en_PACKET_MAT_MAS_REQ_GAME_ROOM;
-		*newPacket << Type << pPlayer->_ClientKey;
-		_pMaster->SendPacket(newPacket);
+		//	마스터 서버가 연결되어 있는지 확인
+		if (false == _pMaster->IsConnect())
+		{
+			//	마스터가 연결 안되어 있을 경우 
+			//	방 정보 얻기 실패 패킷 클라이언트에게 전송
+			Type = en_PACKET_CS_MATCH_RES_GAME_ROOM;
+			BYTE Status = 0;
+			CPacket *newPacket = CPacket::Alloc();
+			*newPacket << Type << Status;
+			SendPacket(pPlayer->_ClientID, newPacket);
+			newPacket->Free();
+			return true;
+		}
+		else
+		{
+			//	마스터 서버에 방 정보 요청을 보냄
+			CPacket *newPacket = CPacket::Alloc();
+			Type = en_PACKET_MAT_MAS_REQ_GAME_ROOM;
+			*newPacket << Type << pPlayer->_ClientKey << pPlayer->_AccountNo;
+			_pMaster->SendPacket(newPacket);
+			newPacket->Free();
+			return true;
+		}
 		return true;
 	}
 	//-------------------------------------------------------------
@@ -198,20 +216,31 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 	//
 	//	응답	: 클라이언트가 배틀서버 방 입장을 성공 함
 	//			  마스터 서버에게 방 입장 성공을 전달 
+	//			  클라이언트에게 방 입장 성공 확인 패킷 전달
 	//-------------------------------------------------------------
 	else if (en_PACKET_CS_MATCH_REQ_GAME_ROOM_ENTER == Type)
 	{
+		//	마스터 서버가 연결되어 있는지 확인
+		if (false == _pMaster->IsConnect())
+			return true;
+		//	마스터 서버에 방 정보 성공을 보냄
 		WORD BattleServerNo;
 		int RoomNo;
 		*pPacket >> BattleServerNo >> RoomNo;
-		//	마스터 서버에 방 정보 성공을 보냄
+		
 		CPacket *newPacket = CPacket::Alloc();
 		Type = en_PACKET_MAT_MAS_REQ_ROOM_ENTER_SUCCESS;
 		*newPacket << Type << BattleServerNo << RoomNo << pPlayer->_ClientKey;
 		_pMaster->SendPacket(newPacket);
+		newPacket->Free();
+		
+		CPacket * resPacket = CPacket::Alloc();
+		Type = en_PACKET_CS_MATCH_RES_GAME_ROOM_ENTER;
+		*resPacket << Type;
+		SendPacket(pPlayer->_ClientID, resPacket);
+		resPacket->Free();
 		return true;
 	}
-	
 	return true;
 }
 
@@ -256,6 +285,27 @@ void CMatchServer::HeartbeatThread_Update()
 			}
 		}
 	}
+}
+
+void CMatchServer::LanMonitoringThread_Update()
+{
+	//-------------------------------------------------------------
+	//	모니터링 서버에 전송할 항목 업데이트 후 전송
+	//-------------------------------------------------------------
+	while (1)
+	{
+		Sleep(1000);
+		if (false == _pMonitor->IsConnect())
+		{
+			//	연결 상태가 아닐경우 재접속 시도
+			_pMonitor->Connect(_Config.MONITOR_IP, _Config.MONITOR_PORT, true, LANCLIENT_WORKERTHREAD);
+			continue;
+		}
+
+
+	}
+
+	return;
 }
 
 void CMatchServer::ConfigSet()
@@ -307,9 +357,17 @@ bool CMatchServer::MatchDBSet()
 			g_CrashDump->Crash();
 		}
 	}
-
+	//-------------------------------------------------------------
 	//	하트비트 스레드 생성
-	_HeartbeatThread = (HANDLE)_beginthreadex(NULL, 0, &HeartbeatThread,
+	//-------------------------------------------------------------
+	_hHeartbeatThread = (HANDLE)_beginthreadex(NULL, 0, &HeartbeatThread,
+		(LPVOID)this, 0, NULL);
+	wprintf(L"[Server :: Server_Start]	HeartbeatThread Create\n");
+
+	//-------------------------------------------------------------
+	//	모니터링 전송 스레드 생성
+	//-------------------------------------------------------------
+	_hLanMonitorThread = (HANDLE)_beginthreadex(NULL, 0, &HeartbeatThread,
 		(LPVOID)this, 0, NULL);
 	wprintf(L"[Server :: Server_Start]	HeartbeatThread Create\n");
 	return true;

@@ -141,8 +141,10 @@
     <ClInclude Include="APIHook.h" />
     <ClInclude Include="CommonProtocol.h" />
     <ClInclude Include="Config.h" />
+    <ClInclude Include="CpuUsage.h" />
     <ClInclude Include="DBConnector.h" />
     <ClInclude Include="Dump.h" />
+    <ClInclude Include="EtherNet_PDH.h" />
     <ClInclude Include="LanClient.h" />
     <ClInclude Include="LockFreeQueue.h" />
     <ClInclude Include="LockFreeStack.h" />
@@ -159,8 +161,10 @@
   <ItemGroup>
     <ClCompile Include="APIHook.cpp" />
     <ClCompile Include="Config.cpp" />
+    <ClCompile Include="CpuUsage.cpp" />
     <ClCompile Include="DBConnector.cpp" />
     <ClCompile Include="Dump.cpp" />
+    <ClCompile Include="EtherNet_PDH.cpp" />
     <ClCompile Include="LanClient.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="main.cpp" />

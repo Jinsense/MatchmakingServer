@@ -11,6 +11,8 @@
 #include <cpprest\filestream.h>	
 
 #include "Config.h"
+#include "CpuUsage.h"
+#include "EtherNet_PDH.h"
 #include "LanClient.h"
 #include "NetServer.h"
 #include "DBConnector.h"
@@ -65,13 +67,30 @@ protected:
 		CMatchServer *_pHeartbeatThread = (CMatchServer *)arg;
 		if (NULL == _pHeartbeatThread)
 		{
-			wprintf(L"[Server :: HeartbeatThread] Init Error\n");
+			std::wprintf(L"[Server :: HeartbeatThread] Init Error\n");
 			return false;
 		}
 		_pHeartbeatThread->HeartbeatThread_Update();
 		return true;
 	}
+	//-----------------------------------------------------------
+	//	모니터링 전송
+	//-----------------------------------------------------------
+	static unsigned int WINAPI LanMonitoringThread(LPVOID arg)
+	{
+		CMatchServer *_pLanMonitoringThread = (CMatchServer *)arg;
+		if (NULL == _pLanMonitoringThread)
+		{
+			std::wprintf(L"[Server :: LanMonitoringThread] Init Error\n");
+			return false;
+		}
+		_pLanMonitoringThread->LanMonitoringThread_Update();
+		return true;
+	}
+
+	virtual void	MonitorThread_Update();
 	void	HeartbeatThread_Update();
+	void	LanMonitoringThread_Update();
 
 public:
 	//-----------------------------------------------------------
@@ -108,8 +127,6 @@ public:
 	// White IP 관련
 	//-----------------------------------------------------------
 
-private:
-	virtual void	MonitorThread_Update();
 
 public:
 	CLanClient *	_pMaster;
@@ -120,7 +137,7 @@ public:
 
 protected:
 	SRWLOCK		_DB_srwlock;
-	HANDLE		_HeartbeatThread;
+	HANDLE		_hHeartbeatThread;
 
 	//-------------------------------------------------------------
 	// 접속자 관리.
@@ -134,7 +151,16 @@ protected:
 	//-------------------------------------------------------------
 	// 모니터링용 변수
 	//-------------------------------------------------------------
+	bool		_bMonitor;
+	CCpuUsage	_Cpu;
+	CEthernet	_Ethernet;
+	HANDLE		_hLanMonitorThread;
 
+	PDH_HQUERY		_CpuQuery;
+	PDH_HCOUNTER	_MemoryAvailableMBytes;
+	PDH_HCOUNTER	_MemoryNonpagedBytes;
+	PDH_HCOUNTER	_ProcessPrivateBytes;
+	PDH_FMT_COUNTERVALUE _CounterVal;
 };
 
 #endif _MATCHINGSERVER_SERVER_MATCHING_H_

@@ -18,6 +18,8 @@ public:
 public:
 	//	NETWORK
 	int SERVER_NO;
+	char MASTERTOKEN[32];
+	int MASTERTOKEN_SIZE;
 	UINT VER_CODE;
 
 	WCHAR BIND_IP[20];

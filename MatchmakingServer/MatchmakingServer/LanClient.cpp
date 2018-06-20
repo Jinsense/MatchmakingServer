@@ -36,10 +36,12 @@ void CLanClient::OnEnterJoinServer()
 	//	서버와의 연결 성공 후
 	CPacket *pPacket = CPacket::Alloc();
 
-	WORD Type = en_PACKET_SS_MONITOR_LOGIN;
-	int ServerNo = 2;		//	배틀서버는 2
-
+	WORD Type = en_PACKET_MAT_MAS_REQ_SERVER_ON;
+	int ServerNo = _pMatchingServer->_Config.SERVER_NO;
+	char MasterToken[32] = { 0, };
+	memcpy_s(&MasterToken, sizeof(MasterToken), &_pMatchingServer->_Config.MASTERTOKEN, sizeof(MasterToken));
 	*pPacket << Type << ServerNo;
+	pPacket->PushData((char*)&MasterToken, sizeof(MasterToken));
 
 	SendPacket(pPacket);
 	pPacket->Free();
@@ -55,6 +57,81 @@ void CLanClient::OnLeaveServer()
 
 void CLanClient::OnLanRecv(CPacket *pPacket)
 {
+	//-------------------------------------------------------------
+	//	모니터링 측정 변수
+	//-------------------------------------------------------------
+	m_iRecvPacketTPS++;
+	//-------------------------------------------------------------
+	//	패킷 처리 - 컨텐츠 처리
+	//-------------------------------------------------------------
+	WORD Type;
+	*pPacket >> Type;
+	//-------------------------------------------------------------
+	//	패킷 처리 - 매치메이킹 서버 켜짐 수신 확인
+	//	Type : en_PACKET_MAT_MAS_RES_SERVER_ON
+	//	int	 : ServerNo
+	//-------------------------------------------------------------
+	if (en_PACKET_MAT_MAS_RES_SERVER_ON == Type)
+	{
+		int ServerNo = NULL;
+		*pPacket >> ServerNo;
+		if (ServerNo != _pMatchingServer->_Config.SERVER_NO)
+		{
+			_pMatchingServer->_pLog->Log(const_cast<WCHAR*>(L"Error"), LOG_SYSTEM, const_cast<WCHAR*>(L"Master LanRecv ServerNo Not Same [My ServerNo : %d, Recv ServerNo : %d]"), _pMatchingServer->_Config.SERVER_NO, ServerNo);
+			g_CrashDump->Crash();
+			return;
+		}
+	}
+	//-------------------------------------------------------------
+	//	패킷 처리 - 게임방 정보 응답
+	//	Type : en_PACKET_MAT_MAS_RES_GAME_ROOM
+	//	UINT64 : ClientKey
+	//	BYTE : Status ( 1 : 성공 - 추가 정보 있음 / 0 : 실패 - 추가 정보 없음 )
+	//-------------------------------------------------------------
+	else if (en_PACKET_MAT_MAS_RES_GAME_ROOM == Type)
+	{
+		UINT64 ClientKey = NULL;
+		BYTE Status = NULL;
+		*pPacket >> ClientKey >> Status;
+		if (0 == Status)
+		{
+			//	방 정보 얻기 실패
+			Type = en_PACKET_CS_MATCH_RES_GAME_ROOM;
+			CPacket * newPacket = CPacket::Alloc();
+			*newPacket << Type << ClientKey << Status;
+			_pMatchingServer->SendPacket(ClientKey, newPacket);
+			newPacket->Free();
+			return;
+		}
+		else
+		{
+			WCHAR IP[16] = { 0, };
+			WORD Port = NULL;
+			int RoomNo = NULL;
+			char ConnectToken[32] = { 0, };
+			char EnterToken[32] = { 0, };
+			WCHAR ChatServerIP[16] = { 0, };
+			WORD ChatServerPort = NULL;
+
+			pPacket->PopData((char*)&IP, sizeof(IP));
+			*pPacket >> Port >> RoomNo;
+			pPacket->PopData((char*)&ConnectToken, sizeof(ConnectToken));
+			pPacket->PopData((char*)&EnterToken, sizeof(EnterToken));
+			pPacket->PopData((char*)&ChatServerIP, sizeof(ChatServerIP));
+			*pPacket >> ChatServerPort;
+
+			CPacket * newPacket = CPacket::Alloc();
+			newPacket->PushData((char*)&IP, sizeof(IP));
+			*newPacket << Port << RoomNo;
+			newPacket->PushData((char*)&ConnectToken, sizeof(ConnectToken));
+			newPacket->PushData((char*)&EnterToken, sizeof(EnterToken));
+			newPacket->PushData((char*)&ChatServerIP, sizeof(ChatServerIP));
+			*newPacket << ChatServerPort;
+			_pMatchingServer->SendPacket(ClientKey, newPacket);
+			newPacket->Free();
+			return;
+		}
+	}
 
 	return;
 }

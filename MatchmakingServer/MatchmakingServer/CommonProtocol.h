@@ -5,12 +5,21 @@
 
 - 2018.05.07
 
-	# 변경 en_PACKET_BAT_MAS_REQ_LEFT_USER
-	
-		추가 INT64	AccountNo
+# 변경 en_PACKET_MAT_MAS_REQ_GAME_ROOM,
 
-		배틀이 마스터에게 대기방에서 사용자 나감을 알릴때 AccountNo 항목 추가 됨.
-		en_PACKET_BAT_MAS_REQ_LEFT_USER 주석 부분 참고
+추가 UINT64	AccountNo
+
+마스터 서버는 사용자의 고유 값으로 매칭서버가 생성한 ClientKey 만을 알고 있었기에
+AccountNo 를 추가하여 마스터는 ClientKey / AccountNo 를 쌍으로 관리 사용 한다.
+
+
+
+# 변경 en_PACKET_BAT_MAS_REQ_LEFT_USER
+
+추가 INT64	AccountNo
+
+배틀이 마스터에게 대기방에서 사용자 나감을 알릴때 AccountNo 항목 추가 됨.
+en_PACKET_BAT_MAS_REQ_LEFT_USER 주석 부분 참고
 
 
 */
@@ -27,7 +36,7 @@ enum en_PACKET_TYPE
 	//------------------------------------------------------
 	// Chatting Server
 	//------------------------------------------------------
-	en_PACKET_CS_CHAT_SERVER			= 0,
+	en_PACKET_CS_CHAT_SERVER = 0,
 
 	//------------------------------------------------------------
 	// 채팅서버 로그인 요청
@@ -145,14 +154,14 @@ enum en_PACKET_TYPE
 	//------------------------------------------------------
 	// Login Server
 	//------------------------------------------------------
-	en_PACKET_CS_LOGIN_SERVER				= 100,
+	en_PACKET_CS_LOGIN_SERVER = 100,
 
 
 	////////////////////////////////////////////////////////
 	//------------------------------------------------------
 	// Battle Server
 	//------------------------------------------------------
-	en_PACKET_CS_GAME_SERVER				= 1000,
+	en_PACKET_CS_GAME_SERVER = 1000,
 
 
 	//------------------------------------------------------------
@@ -541,7 +550,7 @@ enum en_PACKET_TYPE
 
 
 
-	
+
 	//------------------------------------------------------------
 	// HitDamage
 	//
@@ -810,10 +819,10 @@ enum en_PACKET_TYPE
 	//------------------------------------------------------
 	// Matchmaking Server
 	//------------------------------------------------------
-	en_PACKET_CS_MATCH_SERVER				= 2000,
+	en_PACKET_CS_MATCH_SERVER = 2000,
 
 	//------------------------------------------------------------
-	// 매치메이킹 서버로 로그인 요청 
+	// 매치메이킹 서버로 로그인 요청
 	//
 	//	{
 	//		WORD	Type
@@ -843,8 +852,7 @@ enum en_PACKET_TYPE
 	//	{
 	//		WORD	Type
 	//
-	//		BYTE	Status			
-	//								1 : 성공
+	//		BYTE	Status			1 : 성공
 	//								2 : 세션키 오류
 	//								3 : AccountNo 없음
 	//								4 : 기타 오류
@@ -868,7 +876,7 @@ enum en_PACKET_TYPE
 	//	마스터 서버에게서 받은 정보를 클라이언트에게 돌려주면 된다.
 	//------------------------------------------------------------
 	en_PACKET_CS_MATCH_REQ_GAME_ROOM,
-	
+
 	//------------------------------------------------------------
 	// 방 정보 결과
 	//
@@ -936,7 +944,7 @@ enum en_PACKET_TYPE
 	en_PACKET_CS_MATCH_RES_GAME_ROOM_ENTER,
 
 
-	
+
 
 
 
@@ -948,7 +956,7 @@ enum en_PACKET_TYPE
 	//   Server & Server Protocol 
 	//
 	////////////////////////////////////////////////////////
-	en_PACKET_SS_LAN					= 10000,
+	en_PACKET_SS_LAN = 10000,
 	//------------------------------------------------------
 	// Matchmaking Server <-> Master Server <-> Battle Server <-> Chatting Server
 	//------------------------------------------------------
@@ -962,7 +970,7 @@ enum en_PACKET_TYPE
 	//------------------------------------------------------
 	// Matchmaking Server <-> Master Server
 	//------------------------------------------------------
-	en_PACKET_MAT_MAS					= 10000,
+	en_PACKET_MAT_MAS = 10000,
 
 	//------------------------------------------------------------
 	//	매치메이킹 서버가 마스터 서버에게 서버 켜짐 알림 (로그인)
@@ -1016,9 +1024,12 @@ enum en_PACKET_TYPE
 	//		WORD	Type
 	//
 	//		UINT64	ClientKey			클라이언트 고유 키 (매치메이킹 서버가 생성한 클라이언트 유니크 키)
+	//		UINT64	AccountNo			
 	//	}
 	//
 	//	매치메이킹 서버는 클라이언트에게 게임방 정보 요청을 받으면, 이 패킷을 마스터 서버에게 보냄
+	//
+	//	AccountNo 도 추가 함.  마스터 서버는 ClientKey 와 AccountNo 를 쌍으로 관리 사용한다.
 	//------------------------------------------------------------
 	en_PACKET_MAT_MAS_REQ_GAME_ROOM,
 
@@ -1052,7 +1063,7 @@ enum en_PACKET_TYPE
 	//	방 얻기 실패시 클라이언트는 일정시간 후 재 시도를 하게 될 것이다.
 	//------------------------------------------------------------
 	en_PACKET_MAT_MAS_RES_GAME_ROOM,
-	
+
 
 
 	//------------------------------------------------------------
@@ -1105,7 +1116,7 @@ enum en_PACKET_TYPE
 	//------------------------------------------------------
 	// Battle Server <-> Master Server
 	//------------------------------------------------------
-	en_PACKET_BAT_MAS						= 10100,
+	en_PACKET_BAT_MAS = 10100,
 
 	//
 	// 마스터가 서버 / 배틀이 클라이언트 입장이므로 
@@ -1226,7 +1237,7 @@ enum en_PACKET_TYPE
 	//	마스터 서버는 각 배틀서버의 IP/PORT 를 알고 있으므로 방에 관련 정보만 전달 한다
 	//------------------------------------------------------------
 	en_PACKET_BAT_MAS_REQ_CREATED_ROOM,
-	 
+
 	//------------------------------------------------------------
 	//	배틀 서버의 신규 대기 방 생성 수신 응답
 	//
@@ -1273,7 +1284,7 @@ enum en_PACKET_TYPE
 	//	수신 확인용
 	//------------------------------------------------------------
 	en_PACKET_BAT_MAS_RES_CLOSED_ROOM,
-	
+
 
 	//------------------------------------------------------------
 	//	방에서 유저가 나갔음, 1명 나갈때 마다 전송.
@@ -1303,6 +1314,9 @@ enum en_PACKET_TYPE
 	// 2. 배틀 -> 마스터  에게 사용자 나감 전달 en_PACKET_BAT_MAS_REQ_LEFT_USER
 	//
 	// 이 상황으로 방 하나에 -2 가 차감되는 상황 발생 가능.  그리하여 AccountNO 추가 됨.
+	//
+	// 마스터서버는 각 유저의 고유 값으로 ClientKey 를 사용하지만, Battle 서버는 ClientKey 를 모르기 때문에
+	// Battle 서버는 AccountNo 로 구분하여 사용한다.
 	//------------------------------------------------------------
 	en_PACKET_BAT_MAS_REQ_LEFT_USER,
 
@@ -1327,7 +1341,7 @@ enum en_PACKET_TYPE
 	//------------------------------------------------------
 	// Chat Server <-> Battle Server
 	//------------------------------------------------------
-	en_PACKET_CHAT_BAT						= 10500,
+	en_PACKET_CHAT_BAT = 10500,
 
 	//
 	// 배틀서버가 LanServer / 채팅서버가 LanClient
@@ -1413,7 +1427,7 @@ enum en_PACKET_TYPE
 	//	채팅서버는 해당 채팅방을 생성시킨다.
 	//------------------------------------------------------------
 	en_PACKET_CHAT_BAT_REQ_CREATED_ROOM,
-	 
+
 	//------------------------------------------------------------
 	//	배틀 서버의 신규 대기 방 생성 수신 응답
 	//
@@ -1448,7 +1462,7 @@ enum en_PACKET_TYPE
 	//	필요 없을줄 알았으나... 필요성이 생겨서 추가 함. ;;;
 	//------------------------------------------------------------
 	en_PACKET_CHAT_BAT_REQ_DESTROY_ROOM,
-	 
+
 	//------------------------------------------------------------
 	//	방 삭제 처리 확인						(채팅 -> 배틀)
 	//
@@ -1488,7 +1502,7 @@ enum en_PACKET_TYPE
 	//------------------------------------------------------
 	// Monitor Server  Protocol
 	//------------------------------------------------------
-	en_PACKET_SS_MONITOR					= 20000,
+	en_PACKET_SS_MONITOR = 20000,
 	//------------------------------------------------------
 	// Server -> Monitor Protocol
 	//------------------------------------------------------
@@ -1526,7 +1540,7 @@ enum en_PACKET_TYPE
 	en_PACKET_SS_MONITOR_DATA_UPDATE,
 
 
-	en_PACKET_CS_MONITOR					= 25000,
+	en_PACKET_CS_MONITOR = 25000,
 	//------------------------------------------------------
 	// Monitor -> Monitor Tool Protocol  (Client <-> Server 프로토콜)
 	//------------------------------------------------------
@@ -1578,13 +1592,13 @@ enum en_PACKET_TYPE
 	//------------------------------------------------------------
 	en_PACKET_CS_MONITOR_TOOL_DATA_UPDATE,
 
-/*
+	/*
 	원격 제어 기능을 사용하지 않을 것이므로 생략 됨.
 	//------------------------------------------------------------
 	// 모니터링 클라이언트(툴) 가 모니터링 서버에게 서버 컨트롤
 	//
 	// 이는 모니터링 서버에서 각 클라(모니터링 툴) 에게 지정된 서버의 에이전트에게 재전달 됨.
-	// * 채팅서버는 Shutdown 기능이 없음.  
+	// * 채팅서버는 Shutdown 기능이 없음.
 	//
 	//	{
 	//		WORD	Type
@@ -1595,45 +1609,45 @@ enum en_PACKET_TYPE
 	//
 	//------------------------------------------------------------
 	en_PACKET_CS_MONITOR_TOOL_SERVER_CONTROL,
-*/
+	*/
 
 };
 
 
 
-enum en_PACKET_CS_LOGIN_RES_LOGIN 
+enum en_PACKET_CS_LOGIN_RES_LOGIN
 {
-	dfLOGIN_STATUS_NONE				= -1,		// 미인증상태
-	dfLOGIN_STATUS_FAIL				= 0,		// 세션오류
-	dfLOGIN_STATUS_OK				= 1,		// 성공
-	dfLOGIN_STATUS_GAME				= 2,		// 게임중
-	dfLOGIN_STATUS_ACCOUNT_MISS		= 3,		// account 테이블에 AccountNo 없음
-	dfLOGIN_STATUS_SESSION_MISS		= 4,		// Session 테이블에 AccountNo 없음
-	dfLOGIN_STATUS_STATUS_MISS		= 5,		// Status 테이블에 AccountNo 없음
-	dfLOGIN_STATUS_NOSERVER			= 6,		// 서비스중인 서버가 없음.
+	dfLOGIN_STATUS_NONE = -1,		// 미인증상태
+	dfLOGIN_STATUS_FAIL = 0,		// 세션오류
+	dfLOGIN_STATUS_OK = 1,		// 성공
+	dfLOGIN_STATUS_GAME = 2,		// 게임중
+	dfLOGIN_STATUS_ACCOUNT_MISS = 3,		// account 테이블에 AccountNo 없음
+	dfLOGIN_STATUS_SESSION_MISS = 4,		// Session 테이블에 AccountNo 없음
+	dfLOGIN_STATUS_STATUS_MISS = 5,		// Status 테이블에 AccountNo 없음
+	dfLOGIN_STATUS_NOSERVER = 6,		// 서비스중인 서버가 없음.
 };
 
 
-enum en_PACKET_CS_GAME_RES_LOGIN 
+enum en_PACKET_CS_GAME_RES_LOGIN
 {
-	dfGAME_LOGIN_FAIL				= 0,		// 세션키 오류 또는 Account 데이블상의 오류
-	dfGAME_LOGIN_OK					= 1,		// 성공
-	dfGAME_LOGIN_NOCHARACTER		= 2,		// 성공 / 캐릭터 없음 > 캐릭터 선택화면으로 전환. 
-	dfGAME_LOGIN_VERSION_MISS		= 3,		// 서버,클라 버전 다름
+	dfGAME_LOGIN_FAIL = 0,		// 세션키 오류 또는 Account 데이블상의 오류
+	dfGAME_LOGIN_OK = 1,		// 성공
+	dfGAME_LOGIN_NOCHARACTER = 2,		// 성공 / 캐릭터 없음 > 캐릭터 선택화면으로 전환. 
+	dfGAME_LOGIN_VERSION_MISS = 3,		// 서버,클라 버전 다름
 };
 
 
 // en_PACKET_SS_MONITOR_LOGIN
 enum en_PACKET_CS_MONITOR_TOOL_SERVER_CONTROL
 {
-	dfMONITOR_SERVER_TYPE_LOGIN		= 1,
-	dfMONITOR_SERVER_TYPE_GAME		= 2,
-	dfMONITOR_SERVER_TYPE_CHAT		= 3,
-	dfMONITOR_SERVER_TYPE_AGENT		= 4,
+	dfMONITOR_SERVER_TYPE_LOGIN = 1,
+	dfMONITOR_SERVER_TYPE_GAME = 2,
+	dfMONITOR_SERVER_TYPE_CHAT = 3,
+	dfMONITOR_SERVER_TYPE_AGENT = 4,
 
-	dfMONITOR_SERVER_CONTROL_SHUTDOWN			= 1,		// 서버 정상종료 (게임서버 전용)
-	dfMONITOR_SERVER_CONTROL_TERMINATE			= 2,		// 서버 프로세스 강제종료
-	dfMONITOR_SERVER_CONTROL_RUN				= 3,		// 서버 프로세스 생성 & 실행
+	dfMONITOR_SERVER_CONTROL_SHUTDOWN = 1,		// 서버 정상종료 (게임서버 전용)
+	dfMONITOR_SERVER_CONTROL_TERMINATE = 2,		// 서버 프로세스 강제종료
+	dfMONITOR_SERVER_CONTROL_RUN = 3,		// 서버 프로세스 생성 & 실행
 };
 
 

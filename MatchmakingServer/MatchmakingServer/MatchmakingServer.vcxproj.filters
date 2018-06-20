@@ -48,6 +48,12 @@
     <Filter Include="MatchmakingServer\Common">
       <UniqueIdentifier>{da0768a1-173d-447d-86dd-63a5cb27e367}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LIB\CPUsage">
+      <UniqueIdentifier>{8740fb51-7e07-4620-9f4e-b3e1ddfa225e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LIB\Ethernet">
+      <UniqueIdentifier>{da751ace-9180-4a35-928a-922ded7318c0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -86,6 +92,12 @@
     </ClCompile>
     <ClCompile Include="LanClient.cpp">
       <Filter>LIB\LanClient</Filter>
+    </ClCompile>
+    <ClCompile Include="CpuUsage.cpp">
+      <Filter>LIB\CPUsage</Filter>
+    </ClCompile>
+    <ClCompile Include="EtherNet_PDH.cpp">
+      <Filter>LIB\Ethernet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -139,6 +151,12 @@
     </ClInclude>
     <ClInclude Include="ShDB_ErrorCode.h">
       <Filter>MatchmakingServer\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="CpuUsage.h">
+      <Filter>LIB\CPUsage</Filter>
+    </ClInclude>
+    <ClInclude Include="EtherNet_PDH.h">
+      <Filter>LIB\Ethernet</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
