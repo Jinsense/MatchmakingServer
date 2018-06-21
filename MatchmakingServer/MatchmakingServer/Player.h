@@ -28,7 +28,8 @@ public:
 	char	_SessionKey[64];		//	로그인 서버에서 생성한 세션 키
 	char	_ClientIP[20];				//	클라이언트 접속 IP
 	int		_Status;
-
+	bool	_bEnterRoomReq;			//	방 정보 요청 확인여부
+	bool	_bEnterRoomSuccess;		//	방 입장 완료 확인여부
 };
 
 

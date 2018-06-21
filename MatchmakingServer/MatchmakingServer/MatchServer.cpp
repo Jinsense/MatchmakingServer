@@ -38,6 +38,24 @@ void CMatchServer::OnClientJoin(st_SessionInfo Info)
 void CMatchServer::OnClientLeave(unsigned __int64 ClientID)
 {
 	//-------------------------------------------------------------
+	//	방 입장 요청 - true / 방 입장 완료 - false 일 경우
+	//	마스터 서버에 방 입장 실패 패킷 전송
+	//-------------------------------------------------------------
+	CPlayer * pPlayer = FindPlayer_ClientID(ClientID);
+	if (nullptr == pPlayer)
+	{
+		_pLog->Log(const_cast<WCHAR*>(L"Error"), LOG_SYSTEM, const_cast<WCHAR*>(L"FindClientID Fail [ClientID : %d]"), ClientID);
+		return;
+	}
+	if (true == pPlayer->_bEnterRoomReq && false == pPlayer->_bEnterRoomSuccess)
+	{
+		CPacket *pPacket = CPacket::Alloc();
+		WORD Type = en_PACKET_MAT_MAS_REQ_ROOM_ENTER_FAIL;
+		*pPacket << Type << pPlayer->_ClientKey;
+		_pMaster->SendPacket(pPacket);
+		pPacket->Free();
+	}
+	//-------------------------------------------------------------
 	//	맵에 유저 삭제
 	//-------------------------------------------------------------
 	RemovePlayer(ClientID);
@@ -198,6 +216,7 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 		}
 		else
 		{
+			pPlayer->_bEnterRoomReq = true;
 			//	마스터 서버에 방 정보 요청을 보냄
 			CPacket *newPacket = CPacket::Alloc();
 			Type = en_PACKET_MAT_MAS_REQ_GAME_ROOM;
@@ -220,6 +239,7 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 	//-------------------------------------------------------------
 	else if (en_PACKET_CS_MATCH_REQ_GAME_ROOM_ENTER == Type)
 	{
+		pPlayer->_bEnterRoomSuccess = true;
 		//	마스터 서버가 연결되어 있는지 확인
 		if (false == _pMaster->IsConnect())
 			return true;
@@ -255,6 +275,8 @@ void CMatchServer::HeartbeatThread_Update()
 	UINT64 start = GetTickCount64();
 	int count = GetPlayerCount();
 	int usercount = NULL;
+	std::stack<unsigned __int64> temp;
+
 	while (1)
 	{
 		Sleep(1000);
@@ -272,10 +294,18 @@ void CMatchServer::HeartbeatThread_Update()
 			if (now - i->second->_Time > _Config.USER_TIMEOUT)
 			{
 				_pLog->Log(const_cast<WCHAR*>(L"Error"), LOG_SYSTEM, const_cast<WCHAR*>(L"USER TIMEOUT : %d [AccountNo : %d]"), now - i->second->_Time, i->second->_AccountNo);
-				Disconnect(i->second->_ClientID);
+				//	바로 Disconnect 하면 데드락 위험성
+				//	임시 stack에 넣고 마지막에 Disconnect 호출할 것
+				temp.push(i->second->_ClientID);
 			}
 		}
 		ReleaseSRWLockExclusive(&_PlayerMap_srwlock);
+		while (!temp.empty())
+		{
+			unsigned __int64 ClientID = temp.top();
+			Disconnect(ClientID);
+			temp.pop();
+		}
 		usercount = GetPlayerCount();
 		if (_Config.USER_CHANGE < abs(count - usercount))
 		{
@@ -301,10 +331,58 @@ void CMatchServer::LanMonitoringThread_Update()
 			_pMonitor->Connect(_Config.MONITOR_IP, _Config.MONITOR_PORT, true, LANCLIENT_WORKERTHREAD);
 			continue;
 		}
-
-
+		PdhCollectQueryData(_CpuQuery);
+		PdhGetFormattedCounterValue(_MemoryNonpagedBytes, PDH_FMT_DOUBLE, NULL, &_CounterVal);
+		_Nonpaged_Memory = (int)_CounterVal.doubleValue / (1024 * 1024);
+		PdhGetFormattedCounterValue(_MemoryAvailableMBytes, PDH_FMT_DOUBLE, NULL, &_CounterVal);
+		_Available_Memory = (int)_CounterVal.doubleValue;
+		PdhGetFormattedCounterValue(_ProcessPrivateBytes, PDH_FMT_DOUBLE, NULL, &_CounterVal);
+		_MatchServer_Memory_Commit = (int)_CounterVal.doubleValue / (1024 * 1024);
+		//-------------------------------------------------------------
+		//	모니터링 서버에 전송할 패킷 생성 후 전송
+		//-------------------------------------------------------------
+		// 하드웨어 CPU 사용률 전체
+		LanMonitorSendPacket(dfMONITOR_DATA_TYPE_SERVER_CPU_TOTAL);
+		// 하드웨어 사용가능 메모리
+		LanMonitorSendPacket(dfMONITOR_DATA_TYPE_SERVER_AVAILABLE_MEMORY);
+		// 하드웨어 이더넷 수신 kb
+		LanMonitorSendPacket(dfMONITOR_DATA_TYPE_SERVER_NETWORK_RECV);
+		// 하드웨어 이더넷 송신 kb
+		LanMonitorSendPacket(dfMONITOR_DATA_TYPE_SERVER_NETWORK_SEND);
+		// 하드웨어 논페이지 메모리 사용량
+		LanMonitorSendPacket(dfMONITOR_DATA_TYPE_SERVER_NONPAGED_MEMORY);
+		//	매치메이킹 서버 ON
+		LanMonitorSendPacket(dfMONITOR_DATA_TYPE_MATCH_SERVER_ON);
+		//	매치메이킹 CPU 사용률 ( 커널 + 유저 )
+		LanMonitorSendPacket(dfMONITOR_DATA_TYPE_MATCH_CPU);
+		//	매치메이킹 메모리 유저 커밋 사용량 (Private) MByte
+		LanMonitorSendPacket(dfMONITOR_DATA_TYPE_MATCH_MEMORY_COMMIT);
+		//	매치메이킹 패킷풀 사용량
+		LanMonitorSendPacket(dfMONITOR_DATA_TYPE_MATCH_PACKET_POOL);
+		//	매치메이킹 접속 세션
+		LanMonitorSendPacket(dfMONITOR_DATA_TYPE_MATCH_SESSION);
+		//	매치메이킹 접속 유저 ( 로그인 성공 후 )
+		LanMonitorSendPacket(dfMONITOR_DATA_TYPE_MATCH_PLAYER);
+		//	매치메이킹 방 배정 성공 수 ( 초당 )     
+		LanMonitorSendPacket(dfMONITOR_DATA_TYPE_MATCH_MATCHSUCCESS);
 	}
+	return;
+}
 
+void CMatchServer::LanMasterCheckThead_Update()
+{
+	//-------------------------------------------------------------
+	//	마스터 서버 연결 주기적으로 확인
+	//-------------------------------------------------------------
+	while (1)
+	{
+		Sleep(5000);
+		if (false == _pMaster->IsConnect())
+		{
+			_pMaster->Connect(_Config.MASTER_IP, _Config.MASTER_PORT, true, LANCLIENT_WORKERTHREAD);
+			continue;
+		}
+	}
 	return;
 }
 
@@ -370,6 +448,114 @@ bool CMatchServer::MatchDBSet()
 	_hLanMonitorThread = (HANDLE)_beginthreadex(NULL, 0, &HeartbeatThread,
 		(LPVOID)this, 0, NULL);
 	wprintf(L"[Server :: Server_Start]	HeartbeatThread Create\n");
+	return true;
+}
+
+bool CMatchServer::LanMonitorSendPacket(BYTE DataType)
+{
+	struct tm *pTime = new struct tm;
+	time_t Now;
+	localtime_s(pTime, &Now);
+	_TimeStamp = time(NULL);
+	WORD Type = en_PACKET_SS_MONITOR_DATA_UPDATE;
+
+	switch (DataType)
+	{
+		//-------------------------------------------------------------
+		//	하드웨어 CPU 사용률 전체
+		//-------------------------------------------------------------
+	case dfMONITOR_DATA_TYPE_SERVER_CPU_TOTAL:
+	{
+		break;
+	}
+		//-------------------------------------------------------------
+		//	하드웨어 사용가능 메모리
+		//-------------------------------------------------------------
+	case dfMONITOR_DATA_TYPE_SERVER_AVAILABLE_MEMORY:
+	{
+		break;
+	}
+		//-------------------------------------------------------------
+		//	하드웨어 이더넷 수신 kb
+		//-------------------------------------------------------------
+	case dfMONITOR_DATA_TYPE_SERVER_NETWORK_RECV:
+	{
+		break;
+	}
+		//-------------------------------------------------------------
+		//	하드웨어 이더넷 송신 kb
+		//-------------------------------------------------------------
+	case dfMONITOR_DATA_TYPE_SERVER_NETWORK_SEND:
+	{
+		break;
+	}
+		//-------------------------------------------------------------
+		//	하드웨어 논페이지 메모리 사용량
+		//-------------------------------------------------------------
+	case dfMONITOR_DATA_TYPE_SERVER_NONPAGED_MEMORY:
+	{
+		break;
+	}
+		//-------------------------------------------------------------
+		//	매치메이킹 서버 On
+		//-------------------------------------------------------------
+	case dfMONITOR_DATA_TYPE_MATCH_SERVER_ON:
+	{
+
+		break;
+	}
+		//-------------------------------------------------------------
+		//	매치메이킹 CPU 사용률 (커널 + 유저)
+		//-------------------------------------------------------------
+	case dfMONITOR_DATA_TYPE_MATCH_CPU:
+	{
+
+		break;
+	}
+		//-------------------------------------------------------------
+		//	매치메이킹 메모리 유저 커밋 사용량 (Private) MByte
+		//-------------------------------------------------------------
+	case dfMONITOR_DATA_TYPE_MATCH_MEMORY_COMMIT:
+	{
+
+		break;
+	}
+		//-------------------------------------------------------------
+		//	매치메이킹 패킷풀 사용량
+		//-------------------------------------------------------------
+	case dfMONITOR_DATA_TYPE_MATCH_PACKET_POOL:
+	{
+
+		break;
+	}
+		//-------------------------------------------------------------
+		//	매치메이킹 접속 세션
+		//-------------------------------------------------------------
+	case dfMONITOR_DATA_TYPE_MATCH_SESSION:
+	{
+
+		break;
+	}
+		//-------------------------------------------------------------
+		//	매치메이킹 접속 유저 (로그인 성공 후)
+		//-------------------------------------------------------------
+	case dfMONITOR_DATA_TYPE_MATCH_PLAYER:
+	{
+
+		break;
+	}
+		//-------------------------------------------------------------
+		//	매치메이킹 방 배정 성공 수 (초당)
+		//-------------------------------------------------------------
+	case dfMONITOR_DATA_TYPE_MATCH_MATCHSUCCESS:
+	{
+
+		break;
+	}
+	default:
+		break;
+	}
+	delete pTime;
 	return true;
 }
 

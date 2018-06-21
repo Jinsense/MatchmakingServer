@@ -3,6 +3,7 @@
 
 #include <list>
 #include <map>
+#include <stack>
 #include <windows.h>
 #include <WinInet.h>
 #include <chrono>
@@ -87,10 +88,25 @@ protected:
 		_pLanMonitoringThread->LanMonitoringThread_Update();
 		return true;
 	}
+	//-----------------------------------------------------------
+	//	마스터 서버 연결 체크
+	//-----------------------------------------------------------
+	static unsigned int WINAPI LanMasterCheckThread(LPVOID arg)
+	{
+		CMatchServer *_pLanMasterCheckThread = (CMatchServer *)arg;
+		if (NULL == _pLanMasterCheckThread)
+		{
+			std::wprintf(L"[Server :: LanMonitoringThread] Init Error\n");
+			return false;
+		}
+		_pLanMasterCheckThread->LanMasterCheckThead_Update();
+		return true;
+	}
 
 	virtual void	MonitorThread_Update();
 	void	HeartbeatThread_Update();
 	void	LanMonitoringThread_Update();
+	void	LanMasterCheckThead_Update();
 
 public:
 	//-----------------------------------------------------------
@@ -100,6 +116,7 @@ public:
 	void	UTF8toUTF16(const char *szText, WCHAR *szBuf, int BufLen);
 	void	UTF16toUTF8(WCHAR *szText, char *szBuf, int BufLen);
 	bool	MatchDBSet();
+	bool	LanMonitorSendPacket(BYTE DataType);
 
 	//-----------------------------------------------------------
 	// OnClientJoin, OnClientLeave 에서 호출
@@ -151,10 +168,24 @@ protected:
 	//-------------------------------------------------------------
 	// 모니터링용 변수
 	//-------------------------------------------------------------
-	bool		_bMonitor;
+	int	_TimeStamp;						//	TimeStamp
+	int	_CPU_Total;						//	CPU 전체 사용율
+	int	_Available_Memory;				//	사용가능한 메모리
+	int	_Network_Recv;					//	하드웨어 이더넷 수신
+	int	_Network_Send;					//	하드웨어 이더넷 송신
+	int	_Nonpaged_Memory;				//	논페이지드 메모리
+	int	_MatchServer_On;				//	매치메이킹 서버 ON
+	int	_MatchServer_CPU;				//	매치메이킹 CPU 사용률 (커널 + 유저)
+	int	_MatchServer_Memory_Commit;		//	매치메이킹 메모리 유저 커밋 사용량 (Private) MByte
+	int	_MatchServer_PacketPool;		//	매치메이킹 패킷풀 사용량
+	int	_MatchServer_Session;			//	매치메이킹 접속 세션
+	int	_MatchServer_Player;			//	매치메이킹 접속 유저 (로그인 성공 후)
+	int _MatchServer_MatchSuccess;		//	매치메이킹 방 배정 성공 수 (초당)
+
 	CCpuUsage	_Cpu;
 	CEthernet	_Ethernet;
 	HANDLE		_hLanMonitorThread;
+	HANDLE		_hLanMasterThread;
 
 	PDH_HQUERY		_CpuQuery;
 	PDH_HCOUNTER	_MemoryAvailableMBytes;

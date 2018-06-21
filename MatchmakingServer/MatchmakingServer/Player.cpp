@@ -19,5 +19,7 @@ bool CPlayer::Init()
 	_Status = NULL;
 	ZeroMemory(_SessionKey, sizeof(_SessionKey));
 	ZeroMemory(_ClientIP, sizeof(_ClientIP));
+	_bEnterRoomReq = false;
+	_bEnterRoomSuccess = false;
 	return true;
 }
