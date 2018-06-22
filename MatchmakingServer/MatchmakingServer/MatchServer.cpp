@@ -11,6 +11,19 @@ CMatchServer::CMatchServer()
 	_pMonitor->Constructor(this);
 	_pLog->GetInstance();
 
+	_JoinSession = NULL;
+	_EnterRoomTPS = NULL;
+	_TimeStamp = NULL;
+	_CPU_Total = NULL;
+	_Available_Memory = NULL;
+	_Network_Send = NULL;
+	_Nonpaged_Memory = NULL;
+	_MatchServer_On = 1;
+	_MatchServer_CPU = NULL;
+	_MatchServer_PacketPool = NULL;
+	_MatchServer_Session = NULL;
+	_MatchServer_Player = NULL;
+	_MatchServer_MatchSuccess = NULL;
 }
 
 CMatchServer::~CMatchServer()
@@ -182,7 +195,8 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 			newPacket->Free();
 			return true;
 		}
-		
+		//	로그인 성공 유저 수 증가
+		InterlockedIncrement(&_JoinSession);
 		//	전부 맞다면 로그인 응답 패킷을 보내준다.
 		CPacket * newPacket = CPacket::Alloc();
 		Type = en_PACKET_CS_MATCH_RES_LOGIN;
@@ -216,6 +230,7 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 		}
 		else
 		{
+			//	방 배정 요청 플래그 변경
 			pPlayer->_bEnterRoomReq = true;
 			//	마스터 서버에 방 정보 요청을 보냄
 			CPacket *newPacket = CPacket::Alloc();
@@ -239,6 +254,9 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 	//-------------------------------------------------------------
 	else if (en_PACKET_CS_MATCH_REQ_GAME_ROOM_ENTER == Type)
 	{
+		//	방 배정 성공 카운트 증가
+		InterlockedIncrement(&_EnterRoomTPS);
+		//	방 배정 성공 플래그 변경
 		pPlayer->_bEnterRoomSuccess = true;
 		//	마스터 서버가 연결되어 있는지 확인
 		if (false == _pMaster->IsConnect())
@@ -461,97 +479,144 @@ bool CMatchServer::LanMonitorSendPacket(BYTE DataType)
 
 	switch (DataType)
 	{
-		//-------------------------------------------------------------
-		//	하드웨어 CPU 사용률 전체
-		//-------------------------------------------------------------
+	//-------------------------------------------------------------
+	//	하드웨어 CPU 사용률 전체
+	//-------------------------------------------------------------
 	case dfMONITOR_DATA_TYPE_SERVER_CPU_TOTAL:
 	{
-		break;
+		_CPU_Total = _Cpu.ProcessorTotal();
+		CPacket *pPacket = CPacket::Alloc();
+		*pPacket << Type << DataType << _CPU_Total << _TimeStamp;
+		_pMonitor->SendPacket(pPacket);
+		pPacket->Free();
 	}
-		//-------------------------------------------------------------
-		//	하드웨어 사용가능 메모리
-		//-------------------------------------------------------------
+	break;
+	//-------------------------------------------------------------
+	//	하드웨어 사용가능 메모리
+	//-------------------------------------------------------------
 	case dfMONITOR_DATA_TYPE_SERVER_AVAILABLE_MEMORY:
 	{
-		break;
+		CPacket *pPacket = CPacket::Alloc();
+		*pPacket << Type << DataType << _Available_Memory << _TimeStamp;
+		_pMonitor->SendPacket(pPacket);
+		pPacket->Free();
 	}
-		//-------------------------------------------------------------
-		//	하드웨어 이더넷 수신 kb
-		//-------------------------------------------------------------
+	break;
+	//-------------------------------------------------------------
+	//	하드웨어 이더넷 수신 kb
+	//-------------------------------------------------------------
 	case dfMONITOR_DATA_TYPE_SERVER_NETWORK_RECV:
 	{
-		break;
+		_Network_Recv = _Ethernet._pdh_value_Network_RecvBytes / (1024);
+		_Ethernet._pdh_value_Network_RecvBytes = 0;
+		CPacket *pPacket = CPacket::Alloc();
+		*pPacket << Type << DataType << _Network_Recv << _TimeStamp;
+		_pMonitor->SendPacket(pPacket);
+		pPacket->Free();
 	}
-		//-------------------------------------------------------------
-		//	하드웨어 이더넷 송신 kb
-		//-------------------------------------------------------------
+	break;
+	//-------------------------------------------------------------
+	//	하드웨어 이더넷 송신 kb
+	//-------------------------------------------------------------
 	case dfMONITOR_DATA_TYPE_SERVER_NETWORK_SEND:
 	{
-		break;
+		_Network_Send = _Ethernet._pdh_value_Network_SendBytes / (1024);
+		_Ethernet._pdh_value_Network_SendBytes = 0;
+		CPacket *pPacket = CPacket::Alloc();
+		*pPacket << Type << DataType << _Network_Send << _TimeStamp;
+		_pMonitor->SendPacket(pPacket);
+		pPacket->Free();
 	}
-		//-------------------------------------------------------------
-		//	하드웨어 논페이지 메모리 사용량
-		//-------------------------------------------------------------
+	break;
+	//-------------------------------------------------------------
+	//	하드웨어 논페이지 메모리 사용량 kb
+	//-------------------------------------------------------------
 	case dfMONITOR_DATA_TYPE_SERVER_NONPAGED_MEMORY:
 	{
-		break;
+		CPacket *pPacket = CPacket::Alloc();
+		*pPacket << Type << DataType << _Nonpaged_Memory << _TimeStamp;
+		_pMonitor->SendPacket(pPacket);
+		pPacket->Free();
 	}
-		//-------------------------------------------------------------
-		//	매치메이킹 서버 On
-		//-------------------------------------------------------------
+	break;
+	//-------------------------------------------------------------
+	//	매치메이킹 서버 On
+	//-------------------------------------------------------------
 	case dfMONITOR_DATA_TYPE_MATCH_SERVER_ON:
 	{
-
-		break;
+		CPacket *pPacket = CPacket::Alloc();
+		*pPacket << Type << DataType << _MatchServer_On << _TimeStamp;
 	}
-		//-------------------------------------------------------------
-		//	매치메이킹 CPU 사용률 (커널 + 유저)
-		//-------------------------------------------------------------
+	break;
+	//-------------------------------------------------------------
+	//	매치메이킹 CPU 사용률 (커널 + 유저)
+	//-------------------------------------------------------------
 	case dfMONITOR_DATA_TYPE_MATCH_CPU:
 	{
-
-		break;
+		_MatchServer_CPU = _Cpu.ProcessTotal();
+		CPacket *pPacket = CPacket::Alloc();
+		*pPacket << Type << DataType << _MatchServer_CPU << _TimeStamp;
+		_pMonitor->SendPacket(pPacket);
+		pPacket->Free();
 	}
-		//-------------------------------------------------------------
-		//	매치메이킹 메모리 유저 커밋 사용량 (Private) MByte
-		//-------------------------------------------------------------
+	break;
+	//-------------------------------------------------------------
+	//	매치메이킹 메모리 유저 커밋 사용량 (Private) MByte
+	//-------------------------------------------------------------
 	case dfMONITOR_DATA_TYPE_MATCH_MEMORY_COMMIT:
 	{
-
-		break;
+		CPacket *pPacket = CPacket::Alloc();
+		*pPacket << Type << DataType << _MatchServer_Memory_Commit << _TimeStamp;
+		_pMonitor->SendPacket(pPacket);
+		pPacket->Free();		
 	}
-		//-------------------------------------------------------------
-		//	매치메이킹 패킷풀 사용량
-		//-------------------------------------------------------------
+	break;
+	//-------------------------------------------------------------
+	//	매치메이킹 패킷풀 사용량
+	//-------------------------------------------------------------
 	case dfMONITOR_DATA_TYPE_MATCH_PACKET_POOL:
 	{
-
-		break;
+		_MatchServer_PacketPool = CPacket::m_pMemoryPool->_UseCount;
+		CPacket *pPacket = CPacket::Alloc();
+		*pPacket << Type << DataType << _MatchServer_PacketPool << _TimeStamp;
+		pPacket->Free();
 	}
-		//-------------------------------------------------------------
-		//	매치메이킹 접속 세션
-		//-------------------------------------------------------------
+	break;
+	//-------------------------------------------------------------
+	//	매치메이킹 접속 세션
+	//-------------------------------------------------------------
 	case dfMONITOR_DATA_TYPE_MATCH_SESSION:
 	{
-
-		break;
+		_MatchServer_Session = GetPlayerCount();
+		CPacket *pPacket = CPacket::Alloc();
+		*pPacket << Type << DataType << _MatchServer_Session << _TimeStamp;
+		pPacket->Free();		
 	}
-		//-------------------------------------------------------------
-		//	매치메이킹 접속 유저 (로그인 성공 후)
-		//-------------------------------------------------------------
+	break;
+	//-------------------------------------------------------------
+	//	매치메이킹 접속 유저 (로그인 성공 후)
+	//-------------------------------------------------------------
 	case dfMONITOR_DATA_TYPE_MATCH_PLAYER:
 	{
-
-		break;
+		_MatchServer_Player = _JoinSession;
+		_JoinSession = 0;
+		CPacket *pPacket = CPacket::Alloc();
+		*pPacket << Type << DataType << _MatchServer_Player << _TimeStamp;
+		pPacket->Free();		
 	}
-		//-------------------------------------------------------------
-		//	매치메이킹 방 배정 성공 수 (초당)
-		//-------------------------------------------------------------
+	break;
+	//-------------------------------------------------------------
+	//	매치메이킹 방 배정 성공 수 (초당)
+	//-------------------------------------------------------------
 	case dfMONITOR_DATA_TYPE_MATCH_MATCHSUCCESS:
 	{
-
-		break;
+		_MatchServer_MatchSuccess = _EnterRoomTPS;
+		_EnterRoomTPS = 0;
+		CPacket *pPacket = CPacket::Alloc();
+		*pPacket << Type << DataType << _MatchServer_MatchSuccess << _TimeStamp;
+		pPacket->Free();
 	}
+	break;
 	default:
 		break;
 	}
@@ -634,6 +699,8 @@ void CMatchServer::MonitorThread_Update()
 	while (!m_bShutdown)
 	{
 		Sleep(1000);
+		_Cpu.UpdateCpuTime();
+		_Ethernet.Count();
 		timer = time(NULL);
 		localtime_s(t, &timer);
 
@@ -642,14 +709,26 @@ void CMatchServer::MonitorThread_Update()
 			wprintf(L"	[ServerStart : %d/%d/%d %d:%d:%d]\n\n", year, month, day, hour, min, sec);
 			wprintf(L"	[%d/%d/%d %d:%d:%d]\n\n", t->tm_year + 1900, t->tm_mon + 1,
 				t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
-			wprintf(L"	ConnectSession			:	%I64d	\n", m_iConnectClient);
+	/*		wprintf(L"	ConnectSession			:	%I64d	\n", m_iConnectClient);
 			wprintf(L"	PlayerMapCount			:	%d		\n", GetPlayerCount());
 			wprintf(L"	PacketPool_AllocCount		:	%d	\n", CPacket::GetAllocPool());
 			wprintf(L"	PlayerPool_AllocCount		:	%d	\n", _PlayerPool->GetAllocCount());
 			wprintf(L"	Match_Accept_Total		:	%I64d	\n", m_iAcceptTotal);
 			wprintf(L"	Match_Accept_TPS		:	%I64d	\n", m_iAcceptTPS);
 			wprintf(L"	Match_SendPacket_TPS		:	%I64d	\n", m_iSendPacketTPS);
-			wprintf(L"	Match_RecvPacket_TPS		:	%I64d	\n\n", m_iRecvPacketTPS);
+			wprintf(L"	Match_RecvPacket_TPS		:	%I64d	\n\n", m_iRecvPacketTPS);*/
+			wprintf(L"	접속자수			:	%I64d	\n", m_iConnectClient);
+			wprintf(L"	플레이어맵 인원			:	%d		\n", GetPlayerCount());
+			wprintf(L"	로그인 성공 인원		:	%d		\n", _JoinSession);
+			wprintf(L"	방 배정 성공 1초당 횟수		:%d		\n", _EnterRoomTPS);
+			wprintf(L"	패킷풀 Alloc		:	%d	\n", CPacket::GetAllocPool());
+			wprintf(L"	플레이어풀 Alloc		:	%d	\n", _PlayerPool->GetAllocCount());
+			wprintf(L"	매치서버 Accept 총 횟수		:	%I64d	\n", m_iAcceptTotal);
+			wprintf(L"	매치서버 Accept 1초당 횟수		:	%I64d	\n", m_iAcceptTPS);
+			wprintf(L"	매치서버 Send 1초당 KByte		:	%I64d	\n", m_iSendPacketTPS);
+			wprintf(L"	매치서버 Recv 1초당 KByte		:	%I64d	\n", m_iRecvPacketTPS);
+			wprintf(L"	논페이지 메모리 크기 MByte		:	%d		\n", _Nonpaged_Memory);			
+			wprintf(L"	CPU 사용률				:	%d		\n\n", _MatchServer_CPU);
 		}
 		m_iAcceptTPS = 0;
 		m_iRecvPacketTPS = 0;

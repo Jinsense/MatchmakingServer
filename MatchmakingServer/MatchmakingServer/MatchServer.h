@@ -168,6 +168,8 @@ protected:
 	//-------------------------------------------------------------
 	// 모니터링용 변수
 	//-------------------------------------------------------------
+	long	_JoinSession;				//	로그인 성공 유저 수
+	long	_EnterRoomTPS;				//	방 배정 성공 수
 	int	_TimeStamp;						//	TimeStamp
 	int	_CPU_Total;						//	CPU 전체 사용율
 	int	_Available_Memory;				//	사용가능한 메모리

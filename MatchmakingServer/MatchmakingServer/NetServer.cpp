@@ -809,7 +809,7 @@ unsigned __int64* CNetServer::GetIndex()
 {
 	unsigned __int64 *_iIndex = nullptr;
 	AcquireSRWLockExclusive(&m_srw);
-	SessionStack.Pop(&_iIndex);
+	SessionStack.Pop(_iIndex);
 	ReleaseSRWLockExclusive(&m_srw);
 	return _iIndex;
 }
