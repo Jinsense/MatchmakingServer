@@ -553,6 +553,8 @@ bool CMatchServer::LanMonitorSendPacket(BYTE DataType)
 	{
 		CPacket *pPacket = CPacket::Alloc();
 		*pPacket << Type << DataType << _MatchServer_On << _TimeStamp;
+		_pMonitor->SendPacket(pPacket);
+		pPacket->Free();
 	}
 	break;
 	//-------------------------------------------------------------
