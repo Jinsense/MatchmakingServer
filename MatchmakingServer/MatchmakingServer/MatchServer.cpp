@@ -463,9 +463,16 @@ bool CMatchServer::MatchDBSet()
 	//-------------------------------------------------------------
 	//	모니터링 전송 스레드 생성
 	//-------------------------------------------------------------
-	_hLanMonitorThread = (HANDLE)_beginthreadex(NULL, 0, &HeartbeatThread,
+	_hLanMonitorThread = (HANDLE)_beginthreadex(NULL, 0, &LanMonitoringThread,
 		(LPVOID)this, 0, NULL);
 	wprintf(L"[Server :: Server_Start]	HeartbeatThread Create\n");
+
+	//-------------------------------------------------------------
+	//	마스터 서버 연결 체크 스레드 생성
+	//-------------------------------------------------------------
+	_hLanMasterThread = (HANDLE)_beginthreadex(NULL, 0, &LanMasterCheckThread,
+		(LPVOID)this, 0, NULL);
+	wprintf(L"[Server :: Server_Start]	LanMasterCheckThread Create\n");
 	return true;
 }
 
