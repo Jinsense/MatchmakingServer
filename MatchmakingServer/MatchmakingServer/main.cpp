@@ -19,6 +19,10 @@ int main()
 		return false;
 	}
 	//-----------------------------------------------------------
+	// Packet Code 설정
+	//-----------------------------------------------------------
+	CPacket::Init(Server._Config.PACKET_CODE, Server._Config.PACKET_KEY1, Server._Config.PACKET_KEY2);
+	//-----------------------------------------------------------
 	// MatchServer Status DB 연결
 	//-----------------------------------------------------------
 	if (false == Server._StatusDB.Set(Server._Config.MATCHING_IP, Server._Config.MATCHING_USER, 
