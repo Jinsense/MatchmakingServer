@@ -9,7 +9,7 @@ CMatchServer::CMatchServer()
 	_pMaster->Constructor(this);
 	_pMonitor = new CLanClient;
 	_pMonitor->Constructor(this);
-	_pLog->GetInstance();
+	_pLog = _pLog->GetInstance();
 
 	_JoinSession = NULL;
 	_EnterRoomTPS = NULL;
@@ -440,9 +440,11 @@ bool CMatchServer::MatchDBSet()
 	//-------------------------------------------------------------
 	//	현재 자신의 IP를 구한다.
 	IN_ADDR myip = GetMyIPAddress();
-
+	char *temp = inet_ntoa(myip);
+	WCHAR IP[20] = { 0, };
+	UTF8toUTF16(temp, IP, sizeof(IP));
 	//	기존 서버번호가 있는 경우 INSERT 에러 발생
-	bool bRes = _StatusDB.Query_Save(L"INSERT INTO `server` (`serverno`, `ip`, `port`, `connectuser`, `heartbeat` ) VALUES (%d, %s, $d, NOW())", _Config.SERVER_NO, myip, _Config.BIND_PORT, GetPlayerCount());
+	bool bRes = _StatusDB.Query_Save(L"INSERT INTO `server` (`serverno`, `ip`, `port`, `connectuser`, `heartbeat` ) VALUES (%d, '%s', %d, %d, NOW())", _Config.SERVER_NO, IP, _Config.BIND_PORT, GetPlayerCount());
 	if (false == bRes)
 	{
 		bRes = _StatusDB.Query_Save(L"UPDATE `server` set `ip` = %s, `port` = %d, `connectuser` = %d, `heartbeat` = NOW() where `serverno` = %d", myip, _Config.BIND_PORT, GetPlayerCount(), _Config.SERVER_NO);

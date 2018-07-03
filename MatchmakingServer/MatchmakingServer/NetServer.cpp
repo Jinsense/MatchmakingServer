@@ -47,8 +47,6 @@ bool CNetServer::ServerStart(WCHAR *pOpenIP, int iPort, int iMaxWorkerThread,
 	setlocale(LC_ALL, "Korean");
 	InitializeCriticalSection(&m_SessionCS);
 
-	CPacket::MemoryPoolInit();
-
 	pSessionArray = new st_Session[iMaxSession];
 
 	for (int i = 0; i < iMaxSession; i++)

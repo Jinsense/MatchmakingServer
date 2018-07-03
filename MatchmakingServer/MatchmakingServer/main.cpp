@@ -7,7 +7,7 @@ int main()
 {
 	SYSTEM_INFO SysInfo;
 	CMatchServer Server;
-
+	CPacket::MemoryPoolInit();
 	GetSystemInfo(&SysInfo);
 
 	//-----------------------------------------------------------
@@ -34,11 +34,11 @@ int main()
 	//-----------------------------------------------------------
 	// 모니터링 서버 연결
 	//-----------------------------------------------------------
-	if (false == Server._pMonitor->Connect(Server._Config.MONITOR_IP, Server._Config.MONITOR_PORT, true, LANCLIENT_WORKERTHREAD))
-	{
-		wprintf(L"[MatchServer :: Main] Monitoring Connect Error\n");
-		return false;
-	}
+//	if (false == Server._pMonitor->Connect(Server._Config.MONITOR_IP, Server._Config.MONITOR_PORT, true, LANCLIENT_WORKERTHREAD))
+//	{
+//		wprintf(L"[MatchServer :: Main] Monitoring Connect Error\n");
+//		return false;
+//	}
 	//-----------------------------------------------------------
 	// 마스터 서버 연결
 	//-----------------------------------------------------------
