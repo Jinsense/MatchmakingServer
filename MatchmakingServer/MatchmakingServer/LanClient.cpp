@@ -45,6 +45,7 @@ void CLanClient::OnEnterJoinServer()
 
 	SendPacket(pPacket);
 	pPacket->Free();
+	m_Session->bConnect = true;
 	return;
 }
 

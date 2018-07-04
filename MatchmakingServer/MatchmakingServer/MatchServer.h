@@ -5,7 +5,7 @@
 #include <map>
 #include <stack>
 #include <windows.h>
-#include <WinInet.h>
+#include <winhttp.h>
 #include <chrono>
 
 #include <cpprest\http_client.h>
@@ -20,6 +20,7 @@
 #include "Player.h"	
 #include "ShDB_ErrorCode.h"
 
+#pragma comment (lib, "winhttp.lib")
 //	#pragma comment(lib, "cpprest120_2_4")		// Windows Only
 using namespace utility;                    // Common utilities like string conversions
 using namespace web;                        // Common features like URIs.
@@ -150,7 +151,6 @@ public:
 	CLanClient *	_pMonitor;
 	CDBConnector	_StatusDB;
 	CSystemLog *	_pLog;
-	CConfig			_Config;
 
 protected:
 	SRWLOCK		_DB_srwlock;

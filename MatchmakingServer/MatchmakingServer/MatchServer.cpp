@@ -154,19 +154,34 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 		PostData[L"accountno"] = json::value::number(pPlayer->_AccountNo);
 //		http_client Client(L"http://172.16.2.2:11701/select_account.php");
 		http_client Client(_Config.APISERVER_IP);
-		Client.request(methods::POST, L"", PostData.as_string().c_str(),
-			L"application/json").then([&ResData](http_response response)
+		http_request request(methods::POST);
+		request.headers().add(L"Content-Type", L"application/json");
+		request.headers().add(L"Content-Length", L"100");
+		request.headers().add(L"Host", L"example.com");
+		request.headers().add(L"X-Requested-With", L"XMLHttpRequest");
+		request.set_body(PostData);
+		Client.request(request).then([&ResData](http_response response)
 		{
 			if (response.status_code() == status_codes::OK)
 			{
 				json::value Temp = response.body();
 				ResData = Temp;
 			}
-		});
+//				return response.extract_json();
+			return pplx::task_from_result(json::value());
+		});		
+
+		WCHAR szHeader[] = L"Contnet-Type: application/x-www-form-urlencoded\r\n";
+		char szData[] = "msg = abc";
+		DWORD dwHeaderLength = lstrlenW(szHeader);
+		DWORD dwDataLength = lstrlenA(szData);
+		WinHttpSendRequest(hRequest, szHeader, dwHeaderLength, szData, dwDataLength, dwDataLength, 0);
+
 		//	result 값 확인
-		if (SUCCESS != ResData[L"result"].as_integer())
+		int result = ResData[L"result"].as_integer();
+		if (SUCCESS != result)
 		{
-			if (NOT_JOIN == ResData[L"result"].as_integer())
+			if (NOT_JOIN == result)
 				BYTE Status = ACCOUNTNO_NOT_EXIST;
 			else
 				BYTE Status = ETC_ERROR;
@@ -343,12 +358,6 @@ void CMatchServer::LanMonitoringThread_Update()
 	while (1)
 	{
 		Sleep(1000);
-		if (false == _pMonitor->IsConnect())
-		{
-			//	연결 상태가 아닐경우 재접속 시도
-			_pMonitor->Connect(_Config.MONITOR_IP, _Config.MONITOR_PORT, true, LANCLIENT_WORKERTHREAD);
-			continue;
-		}
 		PdhCollectQueryData(_CpuQuery);
 		PdhGetFormattedCounterValue(_MemoryNonpagedBytes, PDH_FMT_DOUBLE, NULL, &_CounterVal);
 		_Nonpaged_Memory = (int)_CounterVal.doubleValue / (1024 * 1024);
@@ -356,6 +365,12 @@ void CMatchServer::LanMonitoringThread_Update()
 		_Available_Memory = (int)_CounterVal.doubleValue;
 		PdhGetFormattedCounterValue(_ProcessPrivateBytes, PDH_FMT_DOUBLE, NULL, &_CounterVal);
 		_MatchServer_Memory_Commit = (int)_CounterVal.doubleValue / (1024 * 1024);
+		if (false == _pMonitor->IsConnect())
+		{
+			//	연결 상태가 아닐경우 재접속 시도
+			_pMonitor->Connect(_Config.MONITOR_IP, _Config.MONITOR_PORT, true, LANCLIENT_WORKERTHREAD);
+			continue;
+		}
 		//-------------------------------------------------------------
 		//	모니터링 서버에 전송할 패킷 생성 후 전송
 		//-------------------------------------------------------------
@@ -731,15 +746,15 @@ void CMatchServer::MonitorThread_Update()
 			wprintf(L"	접속자수			:	%I64d	\n", m_iConnectClient);
 			wprintf(L"	플레이어맵 인원			:	%d		\n", GetPlayerCount());
 			wprintf(L"	로그인 성공 인원		:	%d		\n", _JoinSession);
-			wprintf(L"	방 배정 성공 1초당 횟수		:%d		\n", _EnterRoomTPS);
-			wprintf(L"	패킷풀 Alloc		:	%d	\n", CPacket::GetAllocPool());
+			wprintf(L"	방 배정 성공 1초당 횟수		:	%d		\n", _EnterRoomTPS);
+			wprintf(L"	패킷풀 Alloc			:	%d	\n", CPacket::GetAllocPool());
 			wprintf(L"	플레이어풀 Alloc		:	%d	\n", _PlayerPool->GetAllocCount());
 			wprintf(L"	매치서버 Accept 총 횟수		:	%I64d	\n", m_iAcceptTotal);
-			wprintf(L"	매치서버 Accept 1초당 횟수		:	%I64d	\n", m_iAcceptTPS);
-			wprintf(L"	매치서버 Send 1초당 KByte		:	%I64d	\n", m_iSendPacketTPS);
-			wprintf(L"	매치서버 Recv 1초당 KByte		:	%I64d	\n", m_iRecvPacketTPS);
-			wprintf(L"	논페이지 메모리 크기 MByte		:	%d		\n", _Nonpaged_Memory);			
-			wprintf(L"	CPU 사용률				:	%d		\n\n", _MatchServer_CPU);
+			wprintf(L"	매치서버 Accept 1초당 횟수	:	%I64d	\n", m_iAcceptTPS);
+			wprintf(L"	매치서버 Send 1초당 KByte	:	%I64d	\n", m_iSendPacketTPS);
+			wprintf(L"	매치서버 Recv 1초당 KByte	:	%I64d	\n", m_iRecvPacketTPS);
+			wprintf(L"	논페이지 메모리 크기 MByte	:	%d		\n", _Nonpaged_Memory);			
+			wprintf(L"	CPU 사용률			:	%d		\n\n", _MatchServer_CPU);
 		}
 		m_iAcceptTPS = 0;
 		m_iRecvPacketTPS = 0;

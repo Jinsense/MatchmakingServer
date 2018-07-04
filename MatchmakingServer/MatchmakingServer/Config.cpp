@@ -7,7 +7,7 @@ CConfig::CConfig()
 	SERVER_NO = NULL;
 	VER_CODE = NULL;
 	ZeroMemory(&MASTERTOKEN, sizeof(MASTERTOKEN));
-	MASTERTOKEN_SIZE = eNUM_BUF;
+	MASTERTOKEN_SIZE = eNUM_BUF * 2;
 
 	ZeroMemory(&BIND_IP, sizeof(BIND_IP));
 	BIND_IP_SIZE = eNUM_BUF;
@@ -57,13 +57,16 @@ bool CConfig::Set()
 	res = _Parse.ProvideArea("NETWORK");
 	if (false == res)
 		return false;
+	res = _Parse.GetValue("MASTERTOKEN", &MASTERTOKEN[0], &MASTERTOKEN_SIZE);
+	if (false == res)
+		return false;
 	res = _Parse.GetValue("SERVER_NO", &SERVER_NO);
 	if (false == res)
 		return false;
 	res = _Parse.GetValue("VER_CODE", &VER_CODE);
 	if (false == res)
 		return false;
-	_Parse.GetValue("MASTERTOKEN", &MASTERTOKEN[32], &MASTERTOKEN_SIZE);
+	
 	res = _Parse.GetValue("BIND_IP", &IP[0], &BIND_IP_SIZE);
 	if (false == res)
 		return false;
