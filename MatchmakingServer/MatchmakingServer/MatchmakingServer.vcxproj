@@ -78,11 +78,12 @@
     <LibraryPath>$(SolutionDir)mysql\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)mysql\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)json;$(SolutionDir)WinHttpClient\Common;$(IncludePath)</IncludePath>
     <LibraryPath>$(VC_SourcePath);$(SolutionDir)mysql\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LibraryPath>$(VC_SourcePath);$(SolutionDir)mysql\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)json;$(SolutionDir)WinHttpClient\Common;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -96,7 +97,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
       <PreprocessorDefinitions>CURL_STATICLIB;_WINSOCK_DEPRECATED_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -126,7 +127,7 @@
       <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
       <PreprocessorDefinitions>CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -138,6 +139,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\json\json-forwards.h" />
+    <ClInclude Include="..\json\json.h" />
     <ClInclude Include="APIHook.h" />
     <ClInclude Include="CommonProtocol.h" />
     <ClInclude Include="Config.h" />
@@ -159,6 +162,7 @@
     <ClInclude Include="ShDB_ErrorCode.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\json\jsoncpp.cpp" />
     <ClCompile Include="APIHook.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="CpuUsage.cpp" />

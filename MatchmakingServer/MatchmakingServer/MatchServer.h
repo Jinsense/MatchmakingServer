@@ -1,16 +1,15 @@
 #ifndef _MATCHINGSERVER_SERVER_MATCHING_H_
 #define _MATCHINGSERVER_SERVER_MATCHING_H_
 
+#include <iostream>
 #include <list>
 #include <map>
 #include <stack>
 #include <windows.h>
-#include <winhttp.h>
 #include <chrono>
 
-#include <cpprest\http_client.h>
-#include <cpprest\filestream.h>	
-
+#include "../json/json.h"
+#include "../WinHttpClient/Common/Include/WinHttpClient.h"
 #include "Config.h"
 #include "CpuUsage.h"
 #include "EtherNet_PDH.h"
@@ -20,13 +19,6 @@
 #include "Player.h"	
 #include "ShDB_ErrorCode.h"
 
-#pragma comment (lib, "winhttp.lib")
-//	#pragma comment(lib, "cpprest120_2_4")		// Windows Only
-using namespace utility;                    // Common utilities like string conversions
-using namespace web;                        // Common features like URIs.
-using namespace web::http;                  // Common HTTP functionality
-using namespace web::http::client;          // HTTP client features
-using namespace concurrency::streams;       // Asynchronous streams
 using namespace std;
 
 #define		SET_CLIENTKEY(ServerNo, ClientID)		ServerNo = ServerNo << 24; ClientID = ServerNo | ClientID;
@@ -196,4 +188,4 @@ protected:
 	PDH_FMT_COUNTERVALUE _CounterVal;
 };
 
-#endif _MATCHINGSERVER_SERVER_MATCHING_H_
+#endif

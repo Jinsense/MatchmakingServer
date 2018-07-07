@@ -24,6 +24,12 @@ CMatchServer::CMatchServer()
 	_MatchServer_Session = NULL;
 	_MatchServer_Player = NULL;
 	_MatchServer_MatchSuccess = NULL;
+
+	PdhOpenQuery(NULL, NULL, &_CpuQuery);
+	PdhAddCounter(_CpuQuery, L"\\Memory\\Available MBytes", NULL, &_MemoryAvailableMBytes);
+	PdhAddCounter(_CpuQuery, L"\\Memory\\Pool Nonpaged Bytes", NULL, &_MemoryNonpagedBytes);
+	PdhAddCounter(_CpuQuery, L"\\Process(MMOGameServer)\\Private Bytes", NULL, &_ProcessPrivateBytes);
+	PdhCollectQueryData(_CpuQuery);
 }
 
 CMatchServer::~CMatchServer()
@@ -129,7 +135,7 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 	{
 		UINT Ver_Code;
 		*pPacket >> pPlayer->_AccountNo;
-		pPacket->PopData((char*)&pPlayer->_SessionKey, sizeof(pPlayer->_SessionKey));
+		pPacket->PopData((char*)&pPlayer->_SessionKey[0], sizeof(pPlayer->_SessionKey));
 		*pPacket >> Ver_Code;
 
 		//	Config의 버전 코드와 맞는지 비교를 한다.
@@ -146,42 +152,54 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 			newPacket->Free();
 			return true;
 		}
-
+		//-------------------------------------------------------------
 		//	JSON 데이터 - AccountNo를 생성한 후 API서버의 select_account.php 요청
 		//	JSON 응답을 파싱한 후 세션키를 비교 한다.
-		json::value PostData;
-		json::value ResData;
-		PostData[L"accountno"] = json::value::number(pPlayer->_AccountNo);
-//		http_client Client(L"http://172.16.2.2:11701/select_account.php");
-		http_client Client(_Config.APISERVER_IP);
-		http_request request(methods::POST);
-		request.headers().add(L"Content-Type", L"application/json");
-		request.headers().add(L"Content-Length", L"100");
-		request.headers().add(L"Host", L"example.com");
-		request.headers().add(L"X-Requested-With", L"XMLHttpRequest");
-		request.set_body(PostData);
-		Client.request(request).then([&ResData](http_response response)
-		{
-			if (response.status_code() == status_codes::OK)
-			{
-				json::value Temp = response.body();
-				ResData = Temp;
-			}
-//				return response.extract_json();
-			return pplx::task_from_result(json::value());
-		});		
+		//-------------------------------------------------------------
+		//	Set Post Data
+		Json::Value PostData;
+		Json::StyledWriter writer;
+		PostData["accountno"] = pPlayer->_AccountNo;
+		string Data = writer.write(PostData);
+//		WinHttpClient HttpClient(L"http://192.168.10.117:11701/select_account.php");
+		WinHttpClient HttpClient(_Config.APISERVER_IP);
+		HttpClient.SetAdditionalDataToSend((BYTE*)Data.c_str(), Data.size());
+		
+		//	Set Request Header
+		wchar_t szSize[50] = L"";
+		swprintf_s(szSize, L"%d", Data.size());
+		wstring Headers = L"Content-Length: ";
+		Headers += szSize;
+		Headers += L"\r\nContent-Type: application/x-www-form-urlencoded\r\n";
+		HttpClient.SetAdditionalRequestHeaders(Headers);
 
-		WCHAR szHeader[] = L"Contnet-Type: application/x-www-form-urlencoded\r\n";
-		char szData[] = "msg = abc";
-		DWORD dwHeaderLength = lstrlenW(szHeader);
-		DWORD dwDataLength = lstrlenA(szData);
-		WinHttpSendRequest(hRequest, szHeader, dwHeaderLength, szData, dwDataLength, dwDataLength, 0);
+		//	Sent HTTP post request
+		HttpClient.SendHttpRequest(L"POST");
+
+		//	Response wstring -> string convert
+		wstring response = HttpClient.GetResponseContent();
+		string temp;
+		temp.assign(response.begin(), response.end());
 
 		//	result 값 확인
-		int result = ResData[L"result"].as_integer();
-		if (SUCCESS != result)
+		Json::Reader reader;
+		Json::Value result;
+		bool Res = reader.parse(temp, result);
+		if (!Res)
 		{
-			if (NOT_JOIN == result)
+			_pLog->Log(const_cast<WCHAR*>(L"Error"), LOG_SYSTEM, const_cast<WCHAR*>(L"Failed to parse Json [AccountNo : %d]"), pPlayer->_AccountNo);
+			CPacket * newPacket = CPacket::Alloc();
+			Type = en_PACKET_CS_MATCH_RES_LOGIN;
+			BYTE Status = ETC_ERROR;
+			*newPacket << Type << Status;
+			SendPacketAndDisConnect(pPlayer->_ClientID, newPacket);
+			newPacket->Free();
+			return true;
+		}
+		int ResNum = result["result"].asInt();
+		if (SUCCESS != ResNum)
+		{
+			if (NOT_JOIN == ResNum)
 				BYTE Status = ACCOUNTNO_NOT_EXIST;
 			else
 				BYTE Status = ETC_ERROR;
@@ -193,13 +211,9 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 			newPacket->Free();
 			return true;
 		}
-//		if (0 != strcmp(ResData[L"sessionkey"].as_string(), pPlayer->_SessionKey))
-//		{
 
-//		}
-		char sessionkey[64] = { 0, };
-		memcpy_s(&sessionkey, sizeof(ResData[L"sessionkey"]), &ResData[L"sessionkey"], sizeof(ResData[L"sessionkey"]));
-		if (0 != strcmp(sessionkey, pPlayer->_SessionKey))
+		string sessionkey = result["sessionkey"].asCString();
+		if (0 != strncmp(sessionkey.c_str(), pPlayer->_SessionKey, sizeof(pPlayer->_SessionKey)))
 		{
 			//	세션키가 다름 응답 후 끊기
 			CPacket * newPacket = CPacket::Alloc();
@@ -316,7 +330,7 @@ void CMatchServer::HeartbeatThread_Update()
 		UINT64 now = GetTickCount64();
 		if (now - start > _Config.DB_TIME_UPDATE)
 		{
-			if (false == _StatusDB.Query_Save(L"update `server` set `heartbeat` = now() where serverno = %d", _Config.SERVER_NO))
+			if (false == _StatusDB.Query(L"update `server` set `heartbeat` = now() where serverno = %d", _Config.SERVER_NO))
 				_pLog->Log(const_cast<WCHAR*>(L"Error"), LOG_SYSTEM, const_cast<WCHAR*>(L"STATUS DB HEARTBEAT UPDATE FAIL [ServerNo : %d]"), _Config.SERVER_NO);
 			else
 				start = GetTickCount64();
@@ -459,10 +473,10 @@ bool CMatchServer::MatchDBSet()
 	WCHAR IP[20] = { 0, };
 	UTF8toUTF16(temp, IP, sizeof(IP));
 	//	기존 서버번호가 있는 경우 INSERT 에러 발생
-	bool bRes = _StatusDB.Query_Save(L"INSERT INTO `server` (`serverno`, `ip`, `port`, `connectuser`, `heartbeat` ) VALUES (%d, '%s', %d, %d, NOW())", _Config.SERVER_NO, IP, _Config.BIND_PORT, GetPlayerCount());
+	bool bRes = _StatusDB.Query(L"INSERT INTO `server` (`serverno`, `ip`, `port`, `connectuser`, `heartbeat` ) VALUES (%d, '%s', %d, %d, NOW())", _Config.SERVER_NO, IP, _Config.BIND_PORT, GetPlayerCount());
 	if (false == bRes)
 	{
-		bRes = _StatusDB.Query_Save(L"UPDATE `server` set `ip` = %s, `port` = %d, `connectuser` = %d, `heartbeat` = NOW() where `serverno` = %d", myip, _Config.BIND_PORT, GetPlayerCount(), _Config.SERVER_NO);
+		bRes = _StatusDB.Query(L"UPDATE `server` set `ip` = '%s', `port` = %d, `connectuser` = %d, `heartbeat` = NOW() where `serverno` = %d;", IP, _Config.BIND_PORT, GetPlayerCount(), _Config.SERVER_NO);
 		if (false == bRes)
 		{
 			//	Status DB에 매치서버 등록 실패

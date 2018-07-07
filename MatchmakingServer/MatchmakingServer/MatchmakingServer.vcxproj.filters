@@ -54,6 +54,9 @@
     <Filter Include="LIB\Ethernet">
       <UniqueIdentifier>{da751ace-9180-4a35-928a-922ded7318c0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LIB\Json/Http">
+      <UniqueIdentifier>{32494448-ae00-4f3d-bece-59543e5097d5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -98,6 +101,9 @@
     </ClCompile>
     <ClCompile Include="EtherNet_PDH.cpp">
       <Filter>LIB\Ethernet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\json\jsoncpp.cpp">
+      <Filter>LIB\Json/Http</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +163,12 @@
     </ClInclude>
     <ClInclude Include="EtherNet_PDH.h">
       <Filter>LIB\Ethernet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\json\json.h">
+      <Filter>LIB\Json/Http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\json\json-forwards.h">
+      <Filter>LIB\Json/Http</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

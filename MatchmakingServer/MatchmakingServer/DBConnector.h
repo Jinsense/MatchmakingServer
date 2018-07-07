@@ -203,7 +203,7 @@ public:
 	// Error 얻기.한 쿼리에 대한 결과 모두 사용 후 정리.
 	//////////////////////////////////////////////////////////////////////
 	int			GetLastError(void) { return _iLastError; };
-	WCHAR		*GetLastErrorMsg(void) { return _szLastErrorMsg; }
+	char		*GetLastErrorMsg(void) { return _szLastErrorMsg; }
 
 
 private:
@@ -253,7 +253,7 @@ private:
 	char		_szQueryUTF8[eQUERY_MAX_LEN];
 
 	int			_iLastError;
-	WCHAR		_szLastErrorMsg[128];
+	char		_szLastErrorMsg[128];
 
 	CSystemLog	*_Log;
 };
