@@ -92,20 +92,26 @@ void CLanClient::OnLanRecv(CPacket *pPacket)
 	else if (en_PACKET_MAT_MAS_RES_GAME_ROOM == Type)
 	{
 		UINT64 ClientKey = NULL;
+		unsigned __int64 ClientID = NULL;
 		BYTE Status = NULL;
 		*pPacket >> ClientKey >> Status;
+		//	ClientKey로 ClientID를 구한다
+		ClientID = _pMatchingServer->FindPlayer_ClientKey(ClientKey);
+
+		Type = en_PACKET_CS_MATCH_RES_GAME_ROOM;
+		CPacket * newPacket = CPacket::Alloc();
+		*newPacket << Type << Status;
 		if (0 == Status)
 		{
 			//	방 정보 얻기 실패
-			Type = en_PACKET_CS_MATCH_RES_GAME_ROOM;
-			CPacket * newPacket = CPacket::Alloc();
-			*newPacket << Type << ClientKey << Status;
-			_pMatchingServer->SendPacket(ClientKey, newPacket);
+			_pMatchingServer->SendPacket(ClientID, newPacket);
 			newPacket->Free();
 			return;
 		}
 		else
 		{
+			//	방 정보 얻기 성공 - 추가적으로 패킷에서 추출
+			WORD BattleServerNo = NULL;
 			WCHAR IP[16] = { 0, };
 			WORD Port = NULL;
 			int RoomNo = NULL;
@@ -114,6 +120,7 @@ void CLanClient::OnLanRecv(CPacket *pPacket)
 			WCHAR ChatServerIP[16] = { 0, };
 			WORD ChatServerPort = NULL;
 
+			*pPacket >> BattleServerNo;
 			pPacket->PopData((char*)&IP, sizeof(IP));
 			*pPacket >> Port >> RoomNo;
 			pPacket->PopData((char*)&ConnectToken, sizeof(ConnectToken));
@@ -121,14 +128,14 @@ void CLanClient::OnLanRecv(CPacket *pPacket)
 			pPacket->PopData((char*)&ChatServerIP, sizeof(ChatServerIP));
 			*pPacket >> ChatServerPort;
 
-			CPacket * newPacket = CPacket::Alloc();
+			*newPacket << BattleServerNo;
 			newPacket->PushData((char*)&IP, sizeof(IP));
 			*newPacket << Port << RoomNo;
 			newPacket->PushData((char*)&ConnectToken, sizeof(ConnectToken));
 			newPacket->PushData((char*)&EnterToken, sizeof(EnterToken));
 			newPacket->PushData((char*)&ChatServerIP, sizeof(ChatServerIP));
 			*newPacket << ChatServerPort;
-			_pMatchingServer->SendPacket(ClientKey, newPacket);
+			_pMatchingServer->SendPacket(ClientID, newPacket);
 			newPacket->Free();
 			return;
 		}

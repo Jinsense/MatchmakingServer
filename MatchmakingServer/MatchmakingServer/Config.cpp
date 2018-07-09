@@ -9,6 +9,9 @@ CConfig::CConfig()
 	ZeroMemory(&MASTERTOKEN, sizeof(MASTERTOKEN));
 	MASTERTOKEN_SIZE = eNUM_BUF * 2;
 
+	ZeroMemory(&MATCH_IP, sizeof(MATCH_IP));
+	MATCH_IP_SIZE = eNUM_BUF;
+
 	ZeroMemory(&BIND_IP, sizeof(BIND_IP));
 	BIND_IP_SIZE = eNUM_BUF;
 	BIND_PORT = NULL;
@@ -66,7 +69,10 @@ bool CConfig::Set()
 	res = _Parse.GetValue("VER_CODE", &VER_CODE);
 	if (false == res)
 		return false;
-	
+	res = _Parse.GetValue("MATCH_IP", &IP[0], &MATCH_IP_SIZE);
+	if (false == res)
+		return false;
+	_Parse.UTF8toUTF16(IP, MATCH_IP, sizeof(MATCH_IP));
 	res = _Parse.GetValue("BIND_IP", &IP[0], &BIND_IP_SIZE);
 	if (false == res)
 		return false;

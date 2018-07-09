@@ -80,11 +80,11 @@ bool CDBConnector::Query(WCHAR * szStringFormat, ...)
 		//	에러가 떴을 경우 예외처리
 		return false;
 	}
-
+	ZeroMemory(&_szQueryUTF8, sizeof(_szQueryUTF8));
 	//	WCHAR를 CHAR로
 	UTF16toUTF8(_szQuery, _szQueryUTF8, sizeof(_szQuery));
 
-	while (10 > iSpinCount)
+	while (1)
 	{
 		iError = mysql_query(_pMySQL, _szQueryUTF8);
 		if (0 != iError)

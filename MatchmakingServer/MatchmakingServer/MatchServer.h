@@ -131,7 +131,7 @@ public:
 	// 접속한 플레이어 찾기 
 	//-----------------------------------------------------------
 	CPlayer*	FindPlayer_ClientID(unsigned __int64 ClientID);
-//	PLAYER*	FindPlayer_AccountNo(INT64 AccountNo);
+	unsigned __int64	FindPlayer_ClientKey(UINT64 ClientKey);
 
 	//-----------------------------------------------------------
 	// White IP 관련

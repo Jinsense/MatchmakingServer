@@ -46,9 +46,10 @@ void CMatchServer::OnClientJoin(st_SessionInfo Info)
 	//-------------------------------------------------------------
 	CPlayer *pPlayer = _PlayerPool->Alloc();
 	pPlayer->_ClientID = Info.iClientID;
-	unsigned __int64 temp = pPlayer->_ClientID;
+	pPlayer->_ClientKey = pPlayer->_ClientID;
+	__int64 serverno = _Config.SERVER_NO;
 	strcpy_s(pPlayer->_ClientIP, sizeof(pPlayer->_ClientIP), Info.IP);
-	pPlayer->_ClientKey = SET_CLIENTKEY(_Config.SERVER_NO, temp);
+	SET_CLIENTKEY(serverno, pPlayer->_ClientKey);
 	pPlayer->_Time = GetTickCount64();
 	InsertPlayer(pPlayer->_ClientID, pPlayer);
 	return;
@@ -332,9 +333,8 @@ void CMatchServer::HeartbeatThread_Update()
 		{
 			if (false == _StatusDB.Query(L"update `server` set `heartbeat` = now() where serverno = %d", _Config.SERVER_NO))
 				_pLog->Log(const_cast<WCHAR*>(L"Error"), LOG_SYSTEM, const_cast<WCHAR*>(L"STATUS DB HEARTBEAT UPDATE FAIL [ServerNo : %d]"), _Config.SERVER_NO);
-			else
-				start = GetTickCount64();
 		}
+		/*
 		AcquireSRWLockExclusive(&_PlayerMap_srwlock);
 		for (auto i = _PlayerMap.begin(); i != _PlayerMap.end(); i++)
 		{
@@ -353,6 +353,7 @@ void CMatchServer::HeartbeatThread_Update()
 			Disconnect(ClientID);
 			temp.pop();
 		}
+		*/
 		usercount = GetPlayerCount();
 		if (_Config.USER_CHANGE < abs(count - usercount))
 		{
@@ -468,15 +469,15 @@ bool CMatchServer::MatchDBSet()
 	//	Matchmaking Status DB에 매칭서버 정보 insert / update
 	//-------------------------------------------------------------
 	//	현재 자신의 IP를 구한다.
-	IN_ADDR myip = GetMyIPAddress();
-	char *temp = inet_ntoa(myip);
-	WCHAR IP[20] = { 0, };
-	UTF8toUTF16(temp, IP, sizeof(IP));
+	//IN_ADDR myip = GetMyIPAddress();
+	//char *temp = inet_ntoa(myip);
+	//WCHAR IP[20] = { 0, };
+	//UTF8toUTF16(temp, IP, sizeof(IP));
 	//	기존 서버번호가 있는 경우 INSERT 에러 발생
-	bool bRes = _StatusDB.Query(L"INSERT INTO `server` (`serverno`, `ip`, `port`, `connectuser`, `heartbeat` ) VALUES (%d, '%s', %d, %d, NOW())", _Config.SERVER_NO, IP, _Config.BIND_PORT, GetPlayerCount());
+	bool bRes = _StatusDB.Query(L"INSERT INTO `server` (`serverno`, `ip`, `port`, `connectuser`, `heartbeat` ) VALUES (%d, '%s', %d, %d, NOW())", _Config.SERVER_NO, _Config.MATCH_IP, _Config.BIND_PORT, GetPlayerCount());
 	if (false == bRes)
 	{
-		bRes = _StatusDB.Query(L"UPDATE `server` set `ip` = '%s', `port` = %d, `connectuser` = %d, `heartbeat` = NOW() where `serverno` = %d;", IP, _Config.BIND_PORT, GetPlayerCount(), _Config.SERVER_NO);
+		bRes = _StatusDB.Query(L"UPDATE `server` set `ip` = '%s', `port` = %d, `connectuser` = %d, `heartbeat` = NOW() where `serverno` = %d;", _Config.MATCH_IP, _Config.BIND_PORT, GetPlayerCount(), _Config.SERVER_NO);
 		if (false == bRes)
 		{
 			//	Status DB에 매치서버 등록 실패
@@ -713,6 +714,22 @@ CPlayer* CMatchServer::FindPlayer_ClientID(unsigned __int64 ClientID)
 	pPlayer = _PlayerMap.find(ClientID)->second;
 	ReleaseSRWLockExclusive(&_PlayerMap_srwlock);
 	return pPlayer;
+}
+
+unsigned __int64 CMatchServer::FindPlayer_ClientKey(UINT64 ClientKey)
+{
+	unsigned __int64 ClientID = NULL;
+	AcquireSRWLockExclusive(&_PlayerMap_srwlock);
+	for (auto i = _PlayerMap.begin(); i != _PlayerMap.end(); i++)
+	{
+		if (i->second->_ClientKey == ClientKey)
+		{
+			ClientID = i->second->_ClientID;
+			break;
+		}
+	}
+	ReleaseSRWLockExclusive(&_PlayerMap_srwlock);
+	return ClientID;
 }
 
 void CMatchServer::MonitorThread_Update()
