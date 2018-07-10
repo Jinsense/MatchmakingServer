@@ -79,6 +79,7 @@ void CMatchServer::OnClientLeave(unsigned __int64 ClientID)
 	//	맵에 유저 삭제
 	//-------------------------------------------------------------
 	RemovePlayer(ClientID);
+	_PlayerPool->Free(pPlayer);
 	return;
 }
 
@@ -333,6 +334,7 @@ void CMatchServer::HeartbeatThread_Update()
 		{
 			if (false == _StatusDB.Query(L"update `server` set `heartbeat` = now() where serverno = %d", _Config.SERVER_NO))
 				_pLog->Log(const_cast<WCHAR*>(L"Error"), LOG_SYSTEM, const_cast<WCHAR*>(L"STATUS DB HEARTBEAT UPDATE FAIL [ServerNo : %d]"), _Config.SERVER_NO);
+			start = now;
 		}
 		/*
 		AcquireSRWLockExclusive(&_PlayerMap_srwlock);
@@ -766,26 +768,21 @@ void CMatchServer::MonitorThread_Update()
 			wprintf(L"	[ServerStart : %d/%d/%d %d:%d:%d]\n\n", year, month, day, hour, min, sec);
 			wprintf(L"	[%d/%d/%d %d:%d:%d]\n\n", t->tm_year + 1900, t->tm_mon + 1,
 				t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
-	/*		wprintf(L"	ConnectSession			:	%I64d	\n", m_iConnectClient);
-			wprintf(L"	PlayerMapCount			:	%d		\n", GetPlayerCount());
-			wprintf(L"	PacketPool_AllocCount		:	%d	\n", CPacket::GetAllocPool());
-			wprintf(L"	PlayerPool_AllocCount		:	%d	\n", _PlayerPool->GetAllocCount());
-			wprintf(L"	Match_Accept_Total		:	%I64d	\n", m_iAcceptTotal);
-			wprintf(L"	Match_Accept_TPS		:	%I64d	\n", m_iAcceptTPS);
-			wprintf(L"	Match_SendPacket_TPS		:	%I64d	\n", m_iSendPacketTPS);
-			wprintf(L"	Match_RecvPacket_TPS		:	%I64d	\n\n", m_iRecvPacketTPS);*/
-			wprintf(L"	접속자수			:	%I64d	\n", m_iConnectClient);
-			wprintf(L"	플레이어맵 인원			:	%d		\n", GetPlayerCount());
-			wprintf(L"	로그인 성공 인원		:	%d		\n", _JoinSession);
-			wprintf(L"	방 배정 성공 1초당 횟수		:	%d		\n", _EnterRoomTPS);
-			wprintf(L"	패킷풀 Alloc			:	%d	\n", CPacket::GetAllocPool());
-			wprintf(L"	플레이어풀 Alloc		:	%d	\n", _PlayerPool->GetAllocCount());
-			wprintf(L"	매치서버 Accept 총 횟수		:	%I64d	\n", m_iAcceptTotal);
-			wprintf(L"	매치서버 Accept 1초당 횟수	:	%I64d	\n", m_iAcceptTPS);
-			wprintf(L"	매치서버 Send 1초당 KByte	:	%I64d	\n", m_iSendPacketTPS);
-			wprintf(L"	매치서버 Recv 1초당 KByte	:	%I64d	\n", m_iRecvPacketTPS);
-			wprintf(L"	논페이지 메모리 크기 MByte	:	%d		\n", _Nonpaged_Memory);			
-			wprintf(L"	CPU 사용률			:	%d		\n\n", _MatchServer_CPU);
+	
+			wprintf(L"	Connect User			:	%I64d	\n", m_iConnectClient);
+			wprintf(L"	PlayerMap User			:	%d		\n", GetPlayerCount());
+			wprintf(L"	LoginSuccess User Total		:	%d		\n", _JoinSession);
+			wprintf(L"	EnterRoomTPS			:	%d		\n", _EnterRoomTPS);
+			wprintf(L"	PacketPool Alloc		:	%d	\n", CPacket::GetAllocPool());
+			wprintf(L"	PacketPool Use			:	%d	\n", CPacket::_UseCount);
+			wprintf(L"	PlayerPool Alloc		:	%d	\n", _PlayerPool->GetAllocCount());
+			wprintf(L"	PlayerPool User			:	%d	\n\n", _PlayerPool->GetUseCount());
+			wprintf(L"	MatchServer Accept Total	:	%I64d	\n", m_iAcceptTotal);
+			wprintf(L"	MatchServer Accept TPS		:	%I64d	\n", m_iAcceptTPS);
+			wprintf(L"	MatchServer Send KByte/s	:	%I64d	\n", m_iSendPacketTPS);
+			wprintf(L"	MatchServer Recv KByte/s	:	%I64d	\n", m_iRecvPacketTPS);
+			wprintf(L"	NonPaged Memory MByte		:	%d		\n", _Nonpaged_Memory);			
+			wprintf(L"	CPU Usage			:	%d		\n\n", _MatchServer_CPU);
 		}
 		m_iAcceptTPS = 0;
 		m_iRecvPacketTPS = 0;
