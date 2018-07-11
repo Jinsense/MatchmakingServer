@@ -150,7 +150,8 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 			Type = en_PACKET_CS_MATCH_RES_LOGIN;
 			BYTE Status = VER_ERROR;
 			*newPacket << Type << Status;
-			SendPacketAndDisConnect(pPlayer->_ClientID, newPacket);
+			SendPacket(pPlayer->_ClientID, newPacket);
+//			SendPacketAndDisConnect(pPlayer->_ClientID, newPacket);
 			newPacket->Free();
 			return true;
 		}
@@ -194,7 +195,8 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 			Type = en_PACKET_CS_MATCH_RES_LOGIN;
 			BYTE Status = ETC_ERROR;
 			*newPacket << Type << Status;
-			SendPacketAndDisConnect(pPlayer->_ClientID, newPacket);
+			SendPacket(pPlayer->_ClientID, newPacket);
+//			SendPacketAndDisConnect(pPlayer->_ClientID, newPacket);
 			newPacket->Free();
 			return true;
 		}
@@ -209,7 +211,8 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 			Type = en_PACKET_CS_MATCH_RES_LOGIN;
 			BYTE Status = SESSIONKEY_ERROR;
 			*newPacket << Type << Status;
-			SendPacketAndDisConnect(pPlayer->_ClientID, newPacket);
+			SendPacket(pPlayer->_ClientID, newPacket);
+//			SendPacketAndDisConnect(pPlayer->_ClientID, newPacket);
 			newPacket->Free();
 			return true;
 		}
@@ -222,7 +225,8 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 			Type = en_PACKET_CS_MATCH_RES_LOGIN;
 			BYTE Status = SESSIONKEY_ERROR;
 			*newPacket << Type << Status;
-			SendPacketAndDisConnect(pPlayer->_ClientID, newPacket);
+			SendPacket(pPlayer->_ClientID, newPacket);
+//			SendPacketAndDisConnect(pPlayer->_ClientID, newPacket);
 			newPacket->Free();
 			return true;
 		}
@@ -776,7 +780,7 @@ void CMatchServer::MonitorThread_Update()
 			wprintf(L"	PacketPool Alloc		:	%d	\n", CPacket::GetAllocPool());
 			wprintf(L"	PacketPool Use			:	%d	\n", CPacket::_UseCount);
 			wprintf(L"	PlayerPool Alloc		:	%d	\n", _PlayerPool->GetAllocCount());
-			wprintf(L"	PlayerPool User			:	%d	\n\n", _PlayerPool->GetUseCount());
+			wprintf(L"	PlayerPool Use			:	%d	\n\n", _PlayerPool->GetUseCount());
 			wprintf(L"	MatchServer Accept Total	:	%I64d	\n", m_iAcceptTotal);
 			wprintf(L"	MatchServer Accept TPS		:	%I64d	\n", m_iAcceptTPS);
 			wprintf(L"	MatchServer Send KByte/s	:	%I64d	\n", m_iSendPacketTPS);
