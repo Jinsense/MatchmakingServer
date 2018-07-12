@@ -203,13 +203,13 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 		int ResNum = result["result"].asInt();
 		if (SUCCESS != ResNum)
 		{
+			BYTE Status = NULL;
 			if (NOT_JOIN == ResNum)
-				BYTE Status = ACCOUNTNO_NOT_EXIST;
+				Status = ACCOUNTNO_NOT_EXIST;
 			else
-				BYTE Status = ETC_ERROR;
+				Status = ETC_ERROR;
 			CPacket * newPacket = CPacket::Alloc();
 			Type = en_PACKET_CS_MATCH_RES_LOGIN;
-			BYTE Status = SESSIONKEY_ERROR;
 			*newPacket << Type << Status;
 			SendPacket(pPlayer->_ClientID, newPacket);
 //			SendPacketAndDisConnect(pPlayer->_ClientID, newPacket);
