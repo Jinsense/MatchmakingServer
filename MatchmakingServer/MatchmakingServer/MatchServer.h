@@ -168,6 +168,7 @@ protected:
 	int	_Network_Recv;					//	하드웨어 이더넷 수신
 	int	_Network_Send;					//	하드웨어 이더넷 송신
 	int	_Nonpaged_Memory;				//	논페이지드 메모리
+
 	int	_MatchServer_On;				//	매치메이킹 서버 ON
 	int	_MatchServer_CPU;				//	매치메이킹 CPU 사용률 (커널 + 유저)
 	int	_MatchServer_Memory_Commit;		//	매치메이킹 메모리 유저 커밋 사용량 (Private) MByte
