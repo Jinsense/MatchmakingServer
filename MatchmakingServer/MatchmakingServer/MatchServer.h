@@ -13,7 +13,8 @@
 #include "Config.h"
 #include "CpuUsage.h"
 #include "EtherNet_PDH.h"
-#include "LanClient.h"
+#include "LanMonitorClient.h"
+#include "LanMasterClient.h"
 #include "NetServer.h"
 #include "DBConnector.h"
 #include "Player.h"	
@@ -33,7 +34,8 @@ enum en_RES_LOGIN
 	VER_ERROR = 5,
 };
 
-class CLanClient;
+class CLanMasterClient;
+class CLanMonitorClient;
 
 class CMatchServer : public CNetServer
 {
@@ -139,8 +141,8 @@ public:
 
 
 public:
-	CLanClient *	_pMaster;
-	CLanClient *	_pMonitor;
+	CLanMasterClient *	_pMaster;
+	CLanMonitorClient *	_pMonitor;
 	CDBConnector	_StatusDB;
 	CSystemLog *	_pLog;
 

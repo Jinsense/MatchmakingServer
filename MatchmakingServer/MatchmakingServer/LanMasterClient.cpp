@@ -4,34 +4,35 @@
 #include <windows.h>
 
 #include "MatchServer.h"
-#include "LanClient.h"
+#include "LanMasterClient.h"
 
 using namespace std;
 
-CLanClient::CLanClient() :
+CLanMasterClient::CLanMasterClient() :
 	m_iRecvPacketTPS(NULL),
 	m_iSendPacketTPS(NULL)
 {
 	m_Session = new LANSESSION;
-
+	m_bReConnect = false;
+	m_bRelease = false;
 
 	setlocale(LC_ALL, "Korean");
 
 	m_hIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
 }
 
-CLanClient::~CLanClient()
+CLanMasterClient::~CLanMasterClient()
 {
 	delete m_Session;
 }
 
-void CLanClient::Constructor(CMatchServer *pMatching)
+void CLanMasterClient::Constructor(CMatchServer *pMatching)
 {
 	_pMatchingServer = pMatching;
 	return;
 }
 
-void CLanClient::OnEnterJoinServer()
+void CLanMasterClient::OnEnterJoinServer()
 {
 	//	서버와의 연결 성공 후
 	CPacket *pPacket = CPacket::Alloc();
@@ -45,18 +46,22 @@ void CLanClient::OnEnterJoinServer()
 
 	SendPacket(pPacket);
 	pPacket->Free();
+
 	m_Session->bConnect = true;
+
 	return;
 }
 
-void CLanClient::OnLeaveServer()
+void CLanMasterClient::OnLeaveServer()
 {
 	//	서버와의 연결이 끊어졌을 때
 	m_Session->bConnect = false;
+	m_bReConnect = true;
+	m_bRelease = true;
 	return;
 }
 
-void CLanClient::OnLanRecv(CPacket *pPacket)
+void CLanMasterClient::OnLanRecv(CPacket *pPacket)
 {
 	//-------------------------------------------------------------
 	//	모니터링 측정 변수
@@ -121,11 +126,11 @@ void CLanClient::OnLanRecv(CPacket *pPacket)
 			WORD ChatServerPort = NULL;
 
 			*pPacket >> BattleServerNo;
-			pPacket->PopData((char*)&IP, sizeof(IP));
+			pPacket->PopData((char*)&IP[0], sizeof(IP));
 			*pPacket >> Port >> RoomNo;
 			pPacket->PopData((char*)&ConnectToken, sizeof(ConnectToken));
 			pPacket->PopData((char*)&EnterToken, sizeof(EnterToken));
-			pPacket->PopData((char*)&ChatServerIP, sizeof(ChatServerIP));
+			pPacket->PopData((char*)&ChatServerIP[0], sizeof(ChatServerIP));
 			*pPacket >> ChatServerPort;
 
 			*newPacket << BattleServerNo;
@@ -144,36 +149,36 @@ void CLanClient::OnLanRecv(CPacket *pPacket)
 	return;
 }
 
-void CLanClient::OnLanSend(int SendSize)
+void CLanMasterClient::OnLanSend(int SendSize)
 {
 	//	패킷 송신 완료 후
 
 	return;
 }
 
-void CLanClient::OnWorkerThreadBegin()
+void CLanMasterClient::OnWorkerThreadBegin()
 {
 
 }
 
-void CLanClient::OnWorkerThreadEnd()
+void CLanMasterClient::OnWorkerThreadEnd()
 {
 
 }
 
-void CLanClient::OnError(int ErrorCode, WCHAR *pMsg)
+void CLanMasterClient::OnError(int ErrorCode, WCHAR *pMsg)
 {
 
 }
 
-bool CLanClient::Connect(WCHAR * ServerIP, int Port, bool bNoDelay, int MaxWorkerThread)
+bool CLanMasterClient::Connect(WCHAR * ServerIP, int Port, bool bNoDelay, int MaxWorkerThread)
 {
 	wprintf(L"[Client :: ClientInit]	Start\n");
 
 	m_Session->RecvQ.Clear();
 	m_Session->PacketQ.Clear();
 	m_Session->SendFlag = false;
-	m_Session->bConnect = true;
+	m_bRelease = false;
 
 	for (auto i = 0; i < MaxWorkerThread; i++)
 	{
@@ -227,7 +232,7 @@ bool CLanClient::Connect(WCHAR * ServerIP, int Port, bool bNoDelay, int MaxWorke
 	return true;
 }
 
-bool CLanClient::Disconnect()
+bool CLanMasterClient::Disconnect()
 {
 	closesocket(m_Session->sock);
 	m_Session->sock = INVALID_SOCKET;
@@ -264,12 +269,12 @@ bool CLanClient::Disconnect()
 	return true;
 }
 
-bool CLanClient::IsConnect()
+bool CLanMasterClient::IsConnect()
 {
 	return m_Session->bConnect;
 }
 
-bool CLanClient::SendPacket(CPacket *pPacket)
+bool CLanMasterClient::SendPacket(CPacket *pPacket)
 {
 	m_iSendPacketTPS++;
 	pPacket->AddRef();
@@ -280,11 +285,11 @@ bool CLanClient::SendPacket(CPacket *pPacket)
 	return true;
 }
 
-void CLanClient::WorkerThread_Update()
+void CLanMasterClient::WorkerThread_Update()
 {
 	DWORD retval;
 
-	while (m_Session->bConnect)
+	while (!m_bRelease)
 	{
 		//	초기화 필수
 		OVERLAPPED * pOver = NULL;
@@ -344,7 +349,7 @@ void CLanClient::WorkerThread_Update()
 
 }
 
-void CLanClient::CompleteRecv(DWORD dwTransfered)
+void CLanMasterClient::CompleteRecv(DWORD dwTransfered)
 {
 	m_Session->RecvQ.Enqueue(dwTransfered);
 	WORD _wPayloadSize = 0;
@@ -373,7 +378,7 @@ void CLanClient::CompleteRecv(DWORD dwTransfered)
 	RecvPost();
 }
 
-void CLanClient::CompleteSend(DWORD dwTransfered)
+void CLanMasterClient::CompleteSend(DWORD dwTransfered)
 {
 	CPacket * pPacket[LANCLIENT_WSABUFNUM];
 	int Num = m_Session->Send_Count;
@@ -393,7 +398,7 @@ void CLanClient::CompleteSend(DWORD dwTransfered)
 	SendPost();
 }
 
-void CLanClient::StartRecvPost()
+void CLanMasterClient::StartRecvPost()
 {
 	DWORD flags = 0;
 	ZeroMemory(&m_Session->RecvOver, sizeof(m_Session->RecvOver));
@@ -436,7 +441,7 @@ void CLanClient::StartRecvPost()
 	return;
 }
 
-void CLanClient::RecvPost()
+void CLanMasterClient::RecvPost()
 {
 	int Count = InterlockedIncrement(&m_Session->IO_Count);
 	if (1 == Count)
@@ -486,7 +491,7 @@ void CLanClient::RecvPost()
 	return;
 }
 
-void CLanClient::SendPost()
+void CLanMasterClient::SendPost()
 {
 	do
 	{

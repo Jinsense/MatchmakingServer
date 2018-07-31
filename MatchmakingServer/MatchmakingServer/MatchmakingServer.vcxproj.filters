@@ -42,9 +42,6 @@
     <Filter Include="MatchmakingServer\Config">
       <UniqueIdentifier>{d7bef5f9-fea6-45f0-a991-2148435d0aa9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="LIB\LanClient">
-      <UniqueIdentifier>{581b0c7e-6de7-4ad5-98b8-988f68f74658}</UniqueIdentifier>
-    </Filter>
     <Filter Include="MatchmakingServer\Common">
       <UniqueIdentifier>{da0768a1-173d-447d-86dd-63a5cb27e367}</UniqueIdentifier>
     </Filter>
@@ -56,6 +53,18 @@
     </Filter>
     <Filter Include="LIB\Json/Http">
       <UniqueIdentifier>{32494448-ae00-4f3d-bece-59543e5097d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MatchmakingServer\Server\MatchServer">
+      <UniqueIdentifier>{a25e8fb8-3a10-49ee-a121-86407ccfa44d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MatchmakingServer\Server\LanClient">
+      <UniqueIdentifier>{474e76cf-e8fe-4d29-92c6-20b49655ddbd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MatchmakingServer\Server\LanClient\LanMasterClient">
+      <UniqueIdentifier>{b715d7d2-54a9-4d21-bbf5-aed52b61896e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MatchmakingServer\Server\LanClient\LanMonitorClient">
+      <UniqueIdentifier>{4569c9c6-35b7-4f71-a555-24fc72b4e60c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -90,12 +99,6 @@
     <ClCompile Include="Player.cpp">
       <Filter>MatchmakingServer\Player</Filter>
     </ClCompile>
-    <ClCompile Include="MatchServer.cpp">
-      <Filter>MatchmakingServer\Server</Filter>
-    </ClCompile>
-    <ClCompile Include="LanClient.cpp">
-      <Filter>LIB\LanClient</Filter>
-    </ClCompile>
     <ClCompile Include="CpuUsage.cpp">
       <Filter>LIB\CPUsage</Filter>
     </ClCompile>
@@ -104,6 +107,15 @@
     </ClCompile>
     <ClCompile Include="..\json\jsoncpp.cpp">
       <Filter>LIB\Json/Http</Filter>
+    </ClCompile>
+    <ClCompile Include="MatchServer.cpp">
+      <Filter>MatchmakingServer\Server\MatchServer</Filter>
+    </ClCompile>
+    <ClCompile Include="LanMasterClient.cpp">
+      <Filter>MatchmakingServer\Server\LanClient\LanMasterClient</Filter>
+    </ClCompile>
+    <ClCompile Include="LanMonitorClient.cpp">
+      <Filter>MatchmakingServer\Server\LanClient\LanMonitorClient</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -146,12 +158,6 @@
     <ClInclude Include="Player.h">
       <Filter>MatchmakingServer\Player</Filter>
     </ClInclude>
-    <ClInclude Include="MatchServer.h">
-      <Filter>MatchmakingServer\Server</Filter>
-    </ClInclude>
-    <ClInclude Include="LanClient.h">
-      <Filter>LIB\LanClient</Filter>
-    </ClInclude>
     <ClInclude Include="CommonProtocol.h">
       <Filter>MatchmakingServer\Common</Filter>
     </ClInclude>
@@ -169,6 +175,18 @@
     </ClInclude>
     <ClInclude Include="..\json\json-forwards.h">
       <Filter>LIB\Json/Http</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchServer.h">
+      <Filter>MatchmakingServer\Server\MatchServer</Filter>
+    </ClInclude>
+    <ClInclude Include="LanMasterClient.h">
+      <Filter>MatchmakingServer\Server\LanClient\LanMasterClient</Filter>
+    </ClInclude>
+    <ClInclude Include="LanClient.h">
+      <Filter>MatchmakingServer\Server\LanClient</Filter>
+    </ClInclude>
+    <ClInclude Include="LanMonitorClient.h">
+      <Filter>MatchmakingServer\Server\LanClient\LanMonitorClient</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

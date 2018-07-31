@@ -5,9 +5,9 @@ CMatchServer::CMatchServer()
 	InitializeSRWLock(&_DB_srwlock);
 	InitializeSRWLock(&_PlayerMap_srwlock);
 	_PlayerPool = new CMemoryPool<CPlayer>();
-	_pMaster = new CLanClient;
+	_pMaster = new CLanMasterClient;
 	_pMaster->Constructor(this);
-	_pMonitor = new CLanClient;
+	_pMonitor = new CLanMonitorClient;
 	_pMonitor->Constructor(this);
 	_pLog = _pLog->GetInstance();
 
