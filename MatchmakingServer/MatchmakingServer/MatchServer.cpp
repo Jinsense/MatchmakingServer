@@ -293,25 +293,27 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 		InterlockedIncrement(&_EnterRoomTPS);
 		//	방 배정 성공 플래그 변경
 		pPlayer->_bEnterRoomSuccess = true;
-		//	마스터 서버가 연결되어 있는지 확인
-		if (false == _pMaster->IsConnect())
-			return true;
-		//	마스터 서버에 방 정보 성공을 보냄
-		WORD BattleServerNo;
-		int RoomNo;
+
+		WORD BattleServerNo = NULL;
+		int RoomNo = NULL;
 		*pPacket >> BattleServerNo >> RoomNo;
-		
-		CPacket *newPacket = CPacket::Alloc();
-		Type = en_PACKET_MAT_MAS_REQ_ROOM_ENTER_SUCCESS;
-		*newPacket << Type << BattleServerNo << RoomNo << pPlayer->_ClientKey;
-		_pMaster->SendPacket(newPacket);
-		newPacket->Free();
 		
 		CPacket * resPacket = CPacket::Alloc();
 		Type = en_PACKET_CS_MATCH_RES_GAME_ROOM_ENTER;
 		*resPacket << Type;
 		SendPacket(pPlayer->_ClientID, resPacket);
 		resPacket->Free();
+
+		//	마스터 서버가 연결되어 있는지 확인
+		if (false == _pMaster->IsConnect())
+			return true;
+		//	마스터 서버에 방 정보 성공을 보냄
+		CPacket *newPacket = CPacket::Alloc();
+		Type = en_PACKET_MAT_MAS_REQ_ROOM_ENTER_SUCCESS;
+		*newPacket << Type << BattleServerNo << RoomNo << pPlayer->_ClientKey;
+		_pMaster->SendPacket(newPacket);
+		newPacket->Free();
+
 		return true;
 	}
 	return true;
