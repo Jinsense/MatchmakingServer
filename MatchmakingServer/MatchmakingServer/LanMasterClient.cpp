@@ -103,6 +103,9 @@ void CLanMasterClient::OnLanRecv(CPacket *pPacket)
 		//	ClientKey로 ClientID를 구한다
 		ClientID = _pMatchingServer->FindPlayer_ClientKey(ClientKey);
 
+		if (NULL == ClientID)
+			g_CrashDump->Crash();
+
 		Type = en_PACKET_CS_MATCH_RES_GAME_ROOM;
 		CPacket * newPacket = CPacket::Alloc();
 		*newPacket << Type << Status;
