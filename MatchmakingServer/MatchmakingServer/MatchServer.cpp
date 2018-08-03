@@ -793,6 +793,7 @@ void CMatchServer::MonitorThread_Update()
 		m_iAcceptTPS = 0;
 		m_iRecvPacketTPS = 0;
 		m_iSendPacketTPS = 0;
+		_EnterRoomTPS = 0;	//	모니터링 서버 연결하면 삭제해야함
 	}
 	delete t;
 	return;
