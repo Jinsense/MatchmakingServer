@@ -298,12 +298,6 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 		int RoomNo = NULL;
 		*pPacket >> BattleServerNo >> RoomNo;
 		
-		CPacket * resPacket = CPacket::Alloc();
-		Type = en_PACKET_CS_MATCH_RES_GAME_ROOM_ENTER;
-		*resPacket << Type;
-		SendPacket(pPlayer->_ClientID, resPacket);
-		resPacket->Free();
-
 		//	마스터 서버가 연결되어 있는지 확인
 		if (false == _pMaster->IsConnect())
 			return true;
@@ -313,6 +307,13 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 		*newPacket << Type << BattleServerNo << RoomNo << pPlayer->_ClientKey;
 		_pMaster->SendPacket(newPacket);
 		newPacket->Free();
+
+		CPacket * resPacket = CPacket::Alloc();
+		Type = en_PACKET_CS_MATCH_RES_GAME_ROOM_ENTER;
+		*resPacket << Type;
+		SendPacket(pPlayer->_ClientID, resPacket);
+		resPacket->Free();
+
 
 		return true;
 	}
