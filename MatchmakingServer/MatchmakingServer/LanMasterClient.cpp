@@ -104,7 +104,15 @@ void CLanMasterClient::OnLanRecv(CPacket *pPacket)
 		ClientID = _pMatchingServer->FindPlayer_ClientKey(ClientKey);
 
 		if (NULL == ClientID)
-			g_CrashDump->Crash();
+		{
+			//	이미 끊겨서 없는 클라이언트
+			CPacket *pPacket = CPacket::Alloc();
+			WORD Type = en_PACKET_MAT_MAS_REQ_ROOM_ENTER_FAIL;
+			*pPacket << Type << ClientKey;
+			SendPacket(pPacket);
+			pPacket->Free();
+			return;
+		}
 
 		Type = en_PACKET_CS_MATCH_RES_GAME_ROOM;
 		CPacket * newPacket = CPacket::Alloc();
