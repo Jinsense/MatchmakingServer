@@ -45,6 +45,7 @@ void CMatchServer::OnClientJoin(st_SessionInfo Info)
 	//	맵에 유저 추가
 	//-------------------------------------------------------------
 	CPlayer *pPlayer = _PlayerPool->Alloc();
+	pPlayer->Init();
 	pPlayer->_ClientID = Info.iClientID;
 	pPlayer->_ClientKey = pPlayer->_ClientID;
 	__int64 serverno = _Config.SERVER_NO;
