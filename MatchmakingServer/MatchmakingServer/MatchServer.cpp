@@ -152,7 +152,7 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 			BYTE Status = VER_ERROR;
 			*newPacket << Type << Status;
 			SendPacket(pPlayer->_ClientID, newPacket);
-//			SendPacketAndDisConnect(pPlayer->_ClientID, newPacket);
+			//			SendPacketAndDisConnect(pPlayer->_ClientID, newPacket);
 			newPacket->Free();
 			return true;
 		}
@@ -160,35 +160,44 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 		//	JSON 데이터 - AccountNo를 생성한 후 API서버의 select_account.php 요청
 		//	JSON 응답을 파싱한 후 세션키를 비교 한다.
 		//-------------------------------------------------------------
-		//	Set Post Data
-		Json::Value PostData;
-		Json::StyledWriter writer;
-		PostData["accountno"] = pPlayer->_AccountNo;
-		string Data = writer.write(PostData);
-//		WinHttpClient HttpClient(L"http://192.168.10.117:11701/select_account.php");
-		WinHttpClient HttpClient(_Config.APISERVER_IP);
-		HttpClient.SetAdditionalDataToSend((BYTE*)Data.c_str(), Data.size());
-		
-		//	Set Request Header
-		wchar_t szSize[50] = L"";
-		swprintf_s(szSize, L"%d", Data.size());
-		wstring Headers = L"Content-Length: ";
-		Headers += szSize;
-		Headers += L"\r\nContent-Type: application/x-www-form-urlencoded\r\n";
-		HttpClient.SetAdditionalRequestHeaders(Headers);
-
-		//	Sent HTTP post request
-		HttpClient.SendHttpRequest(L"POST");
-
-		//	Response wstring -> string convert
-		wstring response = HttpClient.GetResponseContent();
-		string temp;
-		temp.assign(response.begin(), response.end());
-
-		//	result 값 확인
-		Json::Reader reader;
+		int Count = 0;
+		bool Res = false;
 		Json::Value result;
-		bool Res = reader.parse(temp, result);
+		while (Count < 50)
+		{
+			//	Set Post Data
+			Json::Value PostData;
+			Json::StyledWriter writer;
+			PostData["accountno"] = pPlayer->_AccountNo;
+			string Data = writer.write(PostData);
+			//		WinHttpClient HttpClient(L"http://192.168.10.117:11701/select_account.php");
+			WinHttpClient HttpClient(_Config.APISERVER_IP);
+			HttpClient.SetAdditionalDataToSend((BYTE*)Data.c_str(), Data.size());
+
+			//	Set Request Header
+			wchar_t szSize[50] = L"";
+			swprintf_s(szSize, L"%d", Data.size());
+			wstring Headers = L"Content-Length: ";
+			Headers += szSize;
+			Headers += L"\r\nContent-Type: application/x-www-form-urlencoded\r\n";
+			HttpClient.SetAdditionalRequestHeaders(Headers);
+
+			//	Sent HTTP post request
+			HttpClient.SendHttpRequest(L"POST");
+
+			//	Response wstring -> string convert
+			wstring response = HttpClient.GetResponseContent();
+			string temp;
+			temp.assign(response.begin(), response.end());
+
+			//	result 값 확인
+			Json::Reader reader;
+			Res = reader.parse(temp, result);
+			if (!Res)
+				Count++;
+			else
+				break;
+		}
 		if (!Res)
 		{
 			_pLog->Log(const_cast<WCHAR*>(L"Error"), LOG_SYSTEM, const_cast<WCHAR*>(L"Failed to parse Json [AccountNo : %d]"), pPlayer->_AccountNo);
@@ -197,7 +206,7 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 			BYTE Status = ETC_ERROR;
 			*newPacket << Type << Status;
 			SendPacket(pPlayer->_ClientID, newPacket);
-//			SendPacketAndDisConnect(pPlayer->_ClientID, newPacket);
+			//			SendPacketAndDisConnect(pPlayer->_ClientID, newPacket);
 			newPacket->Free();
 			return true;
 		}
@@ -213,7 +222,7 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 			Type = en_PACKET_CS_MATCH_RES_LOGIN;
 			*newPacket << Type << Status;
 			SendPacket(pPlayer->_ClientID, newPacket);
-//			SendPacketAndDisConnect(pPlayer->_ClientID, newPacket);
+			//			SendPacketAndDisConnect(pPlayer->_ClientID, newPacket);
 			newPacket->Free();
 			return true;
 		}
@@ -227,7 +236,7 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 			BYTE Status = SESSIONKEY_ERROR;
 			*newPacket << Type << Status;
 			SendPacket(pPlayer->_ClientID, newPacket);
-//			SendPacketAndDisConnect(pPlayer->_ClientID, newPacket);
+			//			SendPacketAndDisConnect(pPlayer->_ClientID, newPacket);
 			newPacket->Free();
 			return true;
 		}
@@ -241,6 +250,7 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 		SendPacket(pPlayer->_ClientID, newPacket);
 		newPacket->Free();
 		return true;
+
 	}
 	//-------------------------------------------------------------
 	//	패킷 처리 - 방 정보 요청
@@ -267,7 +277,7 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 		else
 		{
 			//	방 배정 요청 플래그 변경
-			pPlayer->_bEnterRoomReq = true;
+			InterlockedExchange(&pPlayer->_bEnterRoomReq, true);
 			//	마스터 서버에 방 정보 요청을 보냄
 			CPacket *newPacket = CPacket::Alloc();
 			Type = en_PACKET_MAT_MAS_REQ_GAME_ROOM;
@@ -292,8 +302,6 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 	{
 		//	방 배정 성공 카운트 증가
 		InterlockedIncrement(&_EnterRoomTPS);
-		//	방 배정 성공 플래그 변경
-		pPlayer->_bEnterRoomSuccess = true;
 
 		WORD BattleServerNo = NULL;
 		int RoomNo = NULL;
@@ -312,7 +320,8 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 		CPacket * resPacket = CPacket::Alloc();
 		Type = en_PACKET_CS_MATCH_RES_GAME_ROOM_ENTER;
 		*resPacket << Type;
-		SendPacket(pPlayer->_ClientID, resPacket);
+		if(true == SendPacket(pPlayer->_ClientID, resPacket))
+			InterlockedExchange(&pPlayer->_bEnterRoomSuccess, true);	//	방 배정 성공 플래그 변경
 		resPacket->Free();
 
 
