@@ -111,6 +111,7 @@ void CLanMasterClient::OnLanRecv(CPacket *pPacket)
 			*pPacket << Type << ClientKey;
 			SendPacket(pPacket);
 			pPacket->Free();
+			
 			return;
 		}
 
