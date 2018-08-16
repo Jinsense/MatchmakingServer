@@ -24,7 +24,7 @@ CMatchServer::CMatchServer()
 	_MatchServer_Session = NULL;
 	_MatchServer_Player = NULL;
 	_MatchServer_MatchSuccess = NULL;
-
+	
 	PdhOpenQuery(NULL, NULL, &_CpuQuery);
 	PdhAddCounter(_CpuQuery, L"\\Memory\\Available MBytes", NULL, &_MemoryAvailableMBytes);
 	PdhAddCounter(_CpuQuery, L"\\Memory\\Pool Nonpaged Bytes", NULL, &_MemoryNonpagedBytes);
@@ -782,7 +782,6 @@ void CMatchServer::MonitorThread_Update()
 	{
 		Sleep(1000);
 		_Cpu.UpdateCpuTime();
-		_Ethernet.Count();
 		timer = time(NULL);
 		localtime_s(t, &timer);
 
@@ -802,15 +801,19 @@ void CMatchServer::MonitorThread_Update()
 			wprintf(L"	PlayerPool Use			:	%d	\n\n", _PlayerPool->GetUseCount());
 			wprintf(L"	MatchServer Accept Total	:	%I64d	\n", m_iAcceptTotal);
 			wprintf(L"	MatchServer Accept TPS		:	%I64d	\n", m_iAcceptTPS);
-			wprintf(L"	MatchServer Send KByte/s	:	%I64d	\n", _Ethernet._pdh_value_Network_SendBytes / (1024));
-			wprintf(L"	MatchServer Recv KByte/s	:	%I64d	\n", _Ethernet._pdh_value_Network_RecvBytes / (1024));
-			wprintf(L"	NonPaged Memory MByte		:	%d		\n", _Nonpaged_Memory);			
+			wprintf(L"	MatchServer Send KByte/s	:	%f\n", _Ethernet._pdh_value_Network_SendBytes / 1024);
+			wprintf(L"	MatchServer Recv KByte/s	:	%f\n", _Ethernet._pdh_value_Network_RecvBytes / 1024);
+			wprintf(L"	NonPaged Memory MByte		:	%d\n", _Nonpaged_Memory);			
 			wprintf(L"	CPU Usage			:	%d		\n\n", _MatchServer_CPU);
 		}
 		m_iAcceptTPS = 0;
 		m_iRecvPacketTPS = 0;
 		m_iSendPacketTPS = 0;
-		_EnterRoomTPS = 0;	//	모니터링 서버 연결하면 삭제해야함
+		//	아래 항목들은 모니터링 서버 연결하면 삭제해야함
+		_EnterRoomTPS = 0;	
+		_Ethernet._pdh_value_Network_SendBytes = 0;
+		_Ethernet._pdh_value_Network_RecvBytes = 0;
+		_Ethernet.Count();
 	}
 	delete t;
 	return;

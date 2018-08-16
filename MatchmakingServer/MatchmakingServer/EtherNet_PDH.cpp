@@ -20,6 +20,8 @@ CEthernet::~CEthernet()
 
 bool CEthernet::Init()
 {
+	_pdh_value_Network_SendBytes = 0;
+	_pdh_value_Network_RecvBytes = 0;
 	PdhEnumObjectItems(NULL, NULL, L"Network Interface", szCounters, &dwCounterSize, szInterfaces, &dwInterfaceSize, PERF_DETAIL_WIZARD, 0);
 	szCounters = new WCHAR[dwCounterSize];
 	szInterfaces = new WCHAR[dwInterfaceSize];
