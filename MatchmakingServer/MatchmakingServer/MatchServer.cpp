@@ -802,8 +802,8 @@ void CMatchServer::MonitorThread_Update()
 			wprintf(L"	PlayerPool Use			:	%d	\n\n", _PlayerPool->GetUseCount());
 			wprintf(L"	MatchServer Accept Total	:	%I64d	\n", m_iAcceptTotal);
 			wprintf(L"	MatchServer Accept TPS		:	%I64d	\n", m_iAcceptTPS);
-			wprintf(L"	MatchServer Send KByte/s	:	%I64d	\n", m_iSendPacketTPS);
-			wprintf(L"	MatchServer Recv KByte/s	:	%I64d	\n", m_iRecvPacketTPS);
+			wprintf(L"	MatchServer Send KByte/s	:	%I64d	\n", _Ethernet._pdh_value_Network_SendBytes / (1024));
+			wprintf(L"	MatchServer Recv KByte/s	:	%I64d	\n", _Ethernet._pdh_value_Network_RecvBytes / (1024));
 			wprintf(L"	NonPaged Memory MByte		:	%d		\n", _Nonpaged_Memory);			
 			wprintf(L"	CPU Usage			:	%d		\n\n", _MatchServer_CPU);
 		}
