@@ -356,8 +356,13 @@ void CMatchServer::HeartbeatThread_Update()
 		if (now - start > _Config.DB_TIME_UPDATE)
 		{
 			if (false == _StatusDB.Query(L"update `server` set `heartbeat` = now() where serverno = %d", _Config.SERVER_NO))
+			{
 				_pLog->Log(const_cast<WCHAR*>(L"Error"), LOG_SYSTEM, const_cast<WCHAR*>(L"STATUS DB HEARTBEAT UPDATE FAIL [ServerNo : %d]"), _Config.SERVER_NO);
-			start = now;
+				if (false == _StatusDB.IsConnect())
+					_StatusDB.Connect();
+			}
+			else
+				start = now;
 		}
 		/*
 		AcquireSRWLockExclusive(&_PlayerMap_srwlock);

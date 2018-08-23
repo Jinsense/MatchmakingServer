@@ -63,6 +63,14 @@ bool CDBConnector::Disconnect()
 	return true;
 }
 
+bool CDBConnector::IsConnect()
+{
+	if (nullptr == _pMySQL)
+		return false;
+	else
+		return true;
+}
+
 bool CDBConnector::Query(WCHAR * szStringFormat, ...)
 {
 	//	result가 필요한 경우
