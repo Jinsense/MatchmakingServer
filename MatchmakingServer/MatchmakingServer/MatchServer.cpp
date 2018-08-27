@@ -364,7 +364,7 @@ void CMatchServer::HeartbeatThread_Update()
 			else
 				start = now;
 		}
-		/*
+		
 		AcquireSRWLockExclusive(&_PlayerMap_srwlock);
 		for (auto i = _PlayerMap.begin(); i != _PlayerMap.end(); i++)
 		{
@@ -383,7 +383,7 @@ void CMatchServer::HeartbeatThread_Update()
 			Disconnect(ClientID);
 			temp.pop();
 		}
-		*/
+		
 		usercount = GetPlayerCount();
 		if (_Config.USER_CHANGE < abs(count - usercount))
 		{
