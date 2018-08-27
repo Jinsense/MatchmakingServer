@@ -123,6 +123,7 @@ bool CMatchServer::OnRecv(unsigned __int64 ClientID, CPacket *pPacket)
 	//-------------------------------------------------------------
 	WORD Type;
 	*pPacket >> Type;
+	pPlayer->_Time = GetTickCount64();
 	//-------------------------------------------------------------
 	//	패킷 처리 - 매치메이킹 서버로 로그인 요청
 	//	Type	: en_PACKET_CS_MATCH_REQ_LOGIN
