@@ -345,7 +345,7 @@ void CMatchServer::HeartbeatThread_Update()
 	//	전체 유저 대상으로 Heartbeat 기준으로 TimeOut 체크 
 	//	현재 유저가 범위 이상 변화가 발생했을 때 DB에 connectuser 값 갱신
 	//-------------------------------------------------------------
-	UINT64 start = GetTickCount64();
+	INT64 start = GetTickCount64();
 	int count = GetPlayerCount();
 	int usercount = NULL;
 	std::stack<unsigned __int64> temp;
@@ -353,7 +353,7 @@ void CMatchServer::HeartbeatThread_Update()
 	while (1)
 	{
 		Sleep(1000);
-		UINT64 now = GetTickCount64();
+		INT64 now = GetTickCount64();
 		if (now - start > _Config.DB_TIME_UPDATE)
 		{
 			if (false == _StatusDB.Query(L"update `server` set `heartbeat` = now() where serverno = %d", _Config.SERVER_NO))
