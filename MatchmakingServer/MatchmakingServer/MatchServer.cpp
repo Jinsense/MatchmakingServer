@@ -371,7 +371,7 @@ void CMatchServer::HeartbeatThread_Update()
 		{
 			if (now - i->second->_Time > _Config.USER_TIMEOUT)
 			{
-				_pLog->Log(const_cast<WCHAR*>(L"Error"), LOG_SYSTEM, const_cast<WCHAR*>(L"USER TIMEOUT : %d [AccountNo : %d]"), now - i->second->_Time, i->second->_AccountNo);
+				_pLog->Log(const_cast<WCHAR*>(L"Error"), LOG_SYSTEM, const_cast<WCHAR*>(L"USER TIMEOUT : %I64d [AccountNo : %d]"), now - i->second->_Time, i->second->_AccountNo);
 				//	바로 Disconnect 하면 데드락 위험성
 				//	임시 stack에 넣고 마지막에 Disconnect 호출할 것
 				temp.push(i->second->_ClientID);
