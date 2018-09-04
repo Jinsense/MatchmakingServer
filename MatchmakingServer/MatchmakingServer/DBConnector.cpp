@@ -65,7 +65,7 @@ bool CDBConnector::Disconnect()
 
 bool CDBConnector::IsConnect()
 {
-	if (nullptr == _pMySQL)
+	if (nullptr == _pMySQL || NULL == _pMySQL)
 		return false;
 	else
 		return true;
